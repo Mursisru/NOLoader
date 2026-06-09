@@ -14,27 +14,23 @@ Configuration **`RDYTU`**: optimized core, no overlay, no hot-reload, **no UDP t
 
 ## Deploy
 
-Scripts live in **`C:\Users\at747\Desktop\CH\_NOLoader_scripts_\`** (not in repo).
-
-Core only:
+Core only (game closed):
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\RDYTU\deploy-noloader.ps1"
+.\scripts\deploy-noloader.ps1 -Configuration RDYTU
 ```
 
 Optional player mods (after adding to `deploy\NOLoader\mods`):
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\RDYTU\pack-player-mods.ps1"
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\RDYTU\deploy-noloader.ps1" -IncludePlayerMods
+.\scripts\RDYTU\pack-player-mods.ps1
+.\scripts\deploy-noloader.ps1 -Configuration RDYTU -IncludePlayerMods
 ```
 
 ## Verify
 
-From CH scripts folder:
-
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\verify-rdytu.ps1"
+.\scripts\verify-rdytu.ps1
 ```
 
 ## RDYTU vs DEV.SDK
@@ -69,5 +65,7 @@ From CH scripts folder:
 ## Release bundle
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\build-release-bundle.ps1"
+.\scripts\build-release-zips.ps1
 ```
+
+See also [docs/RDYTU.md](../docs/RDYTU.md).

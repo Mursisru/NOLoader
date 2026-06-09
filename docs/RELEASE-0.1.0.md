@@ -9,7 +9,7 @@ First public release for **Nuclear Option**. Two install bundles in one release 
 | **NOLoader-0.1.0-RDYTU.zip** | RDYTU (player) | `0.1.0 Build RDY1R6` | Players — minimal overhead, core only |
 | **NOLoader-0.1.0-DEV.SDK.zip** | DEV.SDK | `0.1.0 Build DEV1PM19` | Mod authors — telemetry, overlay, sample mods |
 
-Full source and documentation: this repository (`main`).
+Full source and documentation: this repository.
 
 ---
 
@@ -20,7 +20,7 @@ Full source and documentation: this repository (`main`).
 **Included:** `winhttp.dll` proxy, `NOLoader/core/*.dll`, performance-oriented `noloader_config.ini`, empty `NOLoader/mods/`, `INSTALL.txt`.
 
 **Highlights:**
-- ~1 FPS overhead vs vanilla (field test, core only, no bundled mods)
+- Core-only bundle (add your own mods)
 - No telemetry, no F10 overlay, no hot-reload
 - Ring log and physics hooks off by default
 - Hash-only mod pipeline for player packs

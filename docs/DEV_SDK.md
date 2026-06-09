@@ -1,6 +1,6 @@
 # DEV.SDK — developer channel
 
-**Version:** `0.1.0 Build DEV1PM19` / GitHub mirror `PR-R2PM1` after sync.
+**Version:** `0.1.0 Build DEV1PM19`
 
 DEV.SDK is the **full-featured** workspace for mod authors: overlay, hot-reload, telemetry, diagnostic mods, plain-text manifests, and sample mods.
 
@@ -30,7 +30,6 @@ Configuration: **`DEV_SDK`** → defines `NOLoader_DEV`.
 ## Build & test
 
 ```powershell
-cd C:\Users\at747\source\repos\NOLoader_Engine
 dotnet build DEV.SDK\NOLoader.DEV_SDK.sln -c DEV_SDK
 dotnet test tests\NOLoader.Core.Tests\NOLoader.Core.Tests.csproj -c DEV_SDK
 dotnet test tests\NOLoader.Patcher.Tests\NOLoader.Patcher.Tests.csproj -c DEV_SDK
@@ -39,7 +38,7 @@ dotnet test tests\NOLoader.Patcher.Tests\NOLoader.Patcher.Tests.csproj -c DEV_SD
 Native proxy (once per machine or after C++ changes):
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\build-proxy.ps1"
+.\scripts\build-proxy.ps1
 ```
 
 ---
@@ -49,7 +48,7 @@ Native proxy (once per machine or after C++ changes):
 **Close Nuclear Option first.**
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\deploy-noloader.ps1" -Configuration DEV_SDK
+.\scripts\deploy-noloader.ps1 -Configuration DEV_SDK
 ```
 
 Deploys:
@@ -62,10 +61,10 @@ Deploys:
 Diagnostic mods (`LoaderDiag`, `LoaderDiagMenu`) — **not** auto-deployed:
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\deploy-diag-mods.ps1"
+.\scripts\deploy-diag-mods.ps1
 ```
 
-Archived copies: `C:\Users\at747\Desktop\CH\_NOLoader_diag_\`
+Build outputs and manifests: `DEV.SDK/diag-mods/`
 
 ---
 
@@ -105,15 +104,15 @@ Each mod has `mod.json` beside source in its project folder.
 ## Full verification
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\verify-dev-sdk.ps1"
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\verify-noloader-all.ps1"
+.\scripts\verify-dev-sdk.ps1
+.\scripts\verify-noloader-all.ps1
 ```
 
 Gate-specific tests:
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\test-gate-l2-brokenmod.ps1"
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\test-gate-l4-faultmission.ps1"
+.\scripts\test-gate-l2-brokenmod.ps1
+.\scripts\test-gate-l4-faultmission.ps1
 ```
 
 ---
@@ -123,8 +122,8 @@ Gate-specific tests:
 Re-bake core patch hashes (game DLLs changed):
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\bake-core-patch-hashes.ps1"
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\verify-core-patch-hashes.ps1"
+.\scripts\bake-core-patch-hashes.ps1
+.\scripts\verify-core-patch-hashes.ps1
 ```
 
 Restore vanilla managed DLLs from `.noloader.bak` if needed, then redeploy.
@@ -133,7 +132,7 @@ Restore vanilla managed DLLs from `.noloader.bak` if needed, then redeploy.
 
 ## GitHub release asset
 
-Download **NOLoader-0.1.0-DEV.SDK.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0). Contains DEV-built core + telemetry + proxy + sample mod sources/build outputs for mod authors.
+Download **NOLoader-0.1.0-DEV.SDK.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0). Contains DEV-built core + telemetry + proxy + sample mod sources.
 
 Full source repository recommended for development.
 
@@ -143,6 +142,6 @@ Full source repository recommended for development.
 
 1. Build/deploy RDYTU channel (see [RDYTU.md](RDYTU.md))
 2. Remove DEV-only mods from `NOLoader/mods/`
-3. Pack mods with `pack-mod-rdytu.ps1` for hash-only manifests
+3. Pack mods with `.\scripts\pack-mod-rdytu.ps1` for hash-only manifests
 
 See [MIGRATION.md](MIGRATION.md) for BepInEx migration notes.

@@ -7,9 +7,7 @@ Standalone mod loader for **Nuclear Option** (Unity Mono). Replaces BepInEx for 
 | **RDYTU** | Players, optimized runtime | `0.1.0 Build RDY1R6` |
 | **DEV.SDK** | Mod authors, full tooling | `0.1.0 Build DEV1PM19` |
 
-**GitHub source mirror (pre-release):** `0.1.0 Build PR-R2PM1` — synced from Engine after release `0.1.0`; active Engine dev: `0.1.0 Build DEV2PM1`.
-
-**Semver (GitHub Releases):** `0.1.0` — tag [`v0.1.0`](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0) includes **two zip assets:** `NOLoader-0.1.0-RDYTU.zip` (player) and `NOLoader-0.1.0-DEV.SDK.zip` (mod authors).
+**GitHub release:** [`v0.1.0`](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0) — two zip assets: `NOLoader-0.1.0-RDYTU.zip` (player) and `NOLoader-0.1.0-DEV.SDK.zip` (mod authors).
 
 ---
 
@@ -24,7 +22,7 @@ Standalone mod loader for **Nuclear Option** (Unity Mono). Replaces BepInEx for 
 7. [Configuration](#configuration)
 8. [Using mods](#using-mods)
 9. [Building from source](#building-from-source)
-10. [Operational scripts](#operational-scripts)
+10. [Scripts](#scripts)
 11. [Documentation index](#documentation-index)
 12. [Troubleshooting](#troubleshooting)
 13. [Migration from BepInEx](#migration-from-bepinex)
@@ -61,7 +59,7 @@ Nuclear Option.exe
 
 **Deep dive:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-**Game API for patches:** use only types from your local API dump (`CH\_Nuclear_Option_\Assembly-CSharp\`) — do not invent signatures.
+**Game API for patches:** derive types and method signatures from your game install (`NuclearOption_Data/Managed/Assembly-CSharp.dll`) or a decompiler — do not invent signatures.
 
 ---
 
@@ -76,33 +74,46 @@ Nuclear Option.exe
 | **Hot-reload** | No | Yes |
 | **Bundled player mods** | No (core only) | Sample mods on deploy |
 | **Physics Rigidbody hooks** | Off by default | On by default |
-| **Typical FPS overhead** | ~1 FPS (core, field test) | Higher (diagnostics) |
+| **Typical FPS overhead** | Low (core only) | Higher (diagnostics) |
 | **Guide** | [docs/RDYTU.md](docs/RDYTU.md) | [docs/DEV_SDK.md](docs/DEV_SDK.md) |
 
 ---
 
 ## Requirements
 
-**For player:**
 - **Nuclear Option** (Steam), Windows x64
-**For mod authors:**
 - **.NET Framework 4.8** SDK (to build)
 - **Visual Studio 2022** with C++ workload (native proxy)
-**Note for users:**
-- Remove **another mod loader** bootstrap from game root before install (if you has it)
+- Remove **BepInEx** bootstrap from game root before install
 
-Default game path: `C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option\`
+Typical Steam install:
+
+`<SteamLibrary>\steamapps\common\Nuclear Option\`
 
 ---
 
 ## Installation
 
-### Download GitHub Release (players)
+### Option A — GitHub Release (players)
 
-1. Download **NOLoader-0.1.0-RDYTU.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0) (player asset in the same release as DEV.SDK).
+1. Download **NOLoader-0.1.0-RDYTU.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0).
 2. **Close the game.**
-3. Extract into the game root.
-4. Launch (if you need to check log - `NOLoader/logs/proxy.log`).
+3. Extract into the game root (folder containing `Nuclear Option.exe`).
+4. Apply Cecil patches if not already present (see [docs/INSTALL.md](docs/INSTALL.md)).
+5. Launch — check `NOLoader/logs/proxy.log`.
+
+### Option B — Build & deploy
+
+From the repository root (game **closed**):
+
+```powershell
+.\scripts\build-proxy.ps1
+.\scripts\deploy-noloader.ps1 -Configuration RDYTU
+# or
+.\scripts\deploy-noloader.ps1 -Configuration DEV_SDK
+```
+
+Optional `-GameRoot` if the game is not in the default Steam location.
 
 **Full guide:** [docs/INSTALL.md](docs/INSTALL.md)
 
@@ -135,6 +146,8 @@ RDYTU section controls performance (ring log, physics hooks). DEV.SDK ignores `[
 
 See [docs/MOD_AUTHOR.md](docs/MOD_AUTHOR.md). Drop folders under `NOLoader/mods/`.
 
+For RDYTU hash-only packs: `.\scripts\pack-mod-rdytu.ps1`
+
 ---
 
 ## Building from source
@@ -144,6 +157,12 @@ dotnet build RDYTU\NOLoader.RDYTU.sln -c RDYTU
 dotnet build DEV.SDK\NOLoader.DEV_SDK.sln -c DEV_SDK
 dotnet test tests\NOLoader.Core.Tests\NOLoader.Core.Tests.csproj -c DEV_SDK
 ```
+
+---
+
+## Scripts
+
+PowerShell helpers in [`scripts/`](scripts/) — deploy, build proxy, verify, hash baking, release zips. See [scripts/README.md](scripts/README.md).
 
 ---
 
@@ -169,6 +188,7 @@ dotnet test tests\NOLoader.Core.Tests\NOLoader.Core.Tests.csproj -c DEV_SDK
 | No loader | Remove BepInEx winhttp; deploy proxy |
 | Patch fail | Close game; restore `.noloader.bak`; redeploy |
 | Gate L4 block | Fix mod error; check logs |
+| Compare FPS vs vanilla | Restore managed DLLs from `.noloader.bak`, remove loader files |
 
 ---
 
@@ -183,7 +203,7 @@ Greenfield loader — rewrite mods as `mod.json` + Cecil. See [docs/MIGRATION.md
 ```
 native/NOLoader.Proxy/
 src/NOLoader.{API,Core,Patcher,PatchTool,Registry,Telemetry}/
-DEV.SDK/   RDYTU/   deploy/   docs/   tests/
+DEV.SDK/   RDYTU/   deploy/   docs/   scripts/   tests/
 ```
 
 Version: [src/NOLoader.Core/AppVersion.cs](src/NOLoader.Core/AppVersion.cs)

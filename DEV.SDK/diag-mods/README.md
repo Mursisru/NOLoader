@@ -1,14 +1,19 @@
-# NOLoader diagnostic mods (off-game archive)
+# Diagnostic mods (DEV.SDK only)
 
-LoaderDiag / LoaderDiagMenu are **not** deployed with normal `deploy-noloader.ps1`.
+Optional audit mods for menu and battle sessions. **Not** deployed by default with `deploy-noloader.ps1`.
 
-| What | Path |
-|------|------|
-| Source | `DEV.SDK/mods/NOLoader.LoaderDiag*` + `NOLoader.DiagCommon` |
-| Manifests | `DEV.SDK/diag-mods/LoaderDiag*/mod.json` |
-| Built drop (canonical) | `C:\Users\at747\Desktop\CH\_NOLoader_diag_\` |
-| Build + pack | `scripts/deploy-diag-mods.ps1` |
-| Install into game (field gate only) | `scripts/deploy-diag-mods.ps1 -InstallToGame` |
+| Mod | Stage | Host |
+|-----|-------|------|
+| LoaderDiagMenu | PreMenu | Main menu probes |
+| LoaderDiag | Mission | Battle map probes |
 
-Copy `_NOLoader_diag_\LoaderDiagMenu` and `_NOLoader_diag_\LoaderDiag` into  
-`...\Nuclear Option\NOLoader\mods\` only when running menu/battle audit sessions.
+## Build & install
+
+```powershell
+.\scripts\deploy-diag-mods.ps1
+# optional: copy built folders into game mods manually
+```
+
+Manifests: `DEV.SDK/diag-mods/LoaderDiagMenu/mod.json`, `LoaderDiag/mod.json`
+
+Copy built `LoaderDiagMenu/` and `LoaderDiag/` folders into `NOLoader/mods/` only when running audit sessions.

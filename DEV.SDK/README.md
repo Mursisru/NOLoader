@@ -2,7 +2,7 @@
 
 Development workspace for NOLoader. Open **`NOLoader.DEV_SDK.sln`** in Visual Studio or Rider.
 
-**Scripts:** `C:\Users\at747\Desktop\CH\_NOLoader_scripts_\` (see `README.md` there).
+Scripts: [`scripts/`](../scripts/README.md)
 
 ## Build
 
@@ -11,28 +11,28 @@ dotnet build NOLoader.DEV_SDK.sln -c DEV_SDK
 dotnet test NOLoader.DEV_SDK.sln -c DEV_SDK
 ```
 
-Hash / verify (from CH scripts):
+Hash / verify:
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\bake-core-patch-hashes.ps1"
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\verify-dev-sdk.ps1"
+.\scripts\bake-core-patch-hashes.ps1
+.\scripts\verify-dev-sdk.ps1
 ```
 
 Native proxy:
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\build-proxy.ps1"
+.\scripts\build-proxy.ps1
 ```
 
 ## Deploy to game
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\deploy-noloader.ps1" -Configuration DEV_SDK
+.\scripts\deploy-noloader.ps1 -Configuration DEV_SDK
 ```
 
 Deploys core (`DEV_SDK` build), gameplay mods (`RegistrySample`, `WeaponNames`, `UniversalLoadout`), and runs Cecil pre-patch when the game is closed.
 
-Diagnostic mods (`LoaderDiagMenu`, `LoaderDiag`) are **not** deployed — see `DEV.SDK/diag-mods/` and `deploy-diag-mods.ps1` in CH scripts.
+Diagnostic mods (`LoaderDiagMenu`, `LoaderDiag`) are **not** deployed automatically — see `diag-mods/` and `.\scripts\deploy-diag-mods.ps1`.
 
 ## Contents
 
@@ -47,4 +47,6 @@ Diagnostic mods (`LoaderDiagMenu`, `LoaderDiag`) are **not** deployed — see `D
 
 Cold-start → menu **2× DONE** → battle **2× DONE** → check `NOLoader/logs/noloader_ring.log`.
 
-Or: `prepare-field-gate-dev.ps1` then `verify-noloader-logs.ps1` in CH scripts folder.
+Or: `.\scripts\prepare-field-gate-dev.ps1` then `.\scripts\verify-noloader-logs.ps1`
+
+See also [docs/DEV_SDK.md](../docs/DEV_SDK.md).

@@ -2,7 +2,7 @@
 
 **Version:** `0.1.0 Build RDY1R6` (see `AppVersion.cs` when built with `RDYTU` configuration).
 
-RDYTU is the **optimized** build for players and end-user mod packs. No developer overlay, no UDP telemetry, no hot-reload, minimal runtime overhead (~1 FPS vs vanilla in field testing, core only).
+RDYTU is the **optimized** build for players and end-user mod packs. No developer overlay, no UDP telemetry, no hot-reload, minimal runtime overhead.
 
 ---
 
@@ -19,7 +19,6 @@ Use **DEV.SDK** if you are writing or debugging mods.
 ## Build
 
 ```powershell
-cd C:\Users\at747\source\repos\NOLoader_Engine
 dotnet build RDYTU\NOLoader.RDYTU.sln -c RDYTU
 ```
 
@@ -32,7 +31,7 @@ Output: `src/NOLoader.Core/bin/RDYTU/net48/` (+ API, Patcher, Registry). **No** 
 **Game must be closed** (PatchTool modifies `NuclearOption_Data/Managed/*.dll`).
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\RDYTU\deploy-noloader.ps1"
+.\scripts\deploy-noloader.ps1 -Configuration RDYTU
 ```
 
 This will:
@@ -49,8 +48,8 @@ This will:
 Add mod folders under `deploy/NOLoader/mods/`, then:
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\RDYTU\pack-player-mods.ps1"
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\RDYTU\deploy-noloader.ps1" -IncludePlayerMods
+.\scripts\RDYTU\pack-player-mods.ps1
+.\scripts\deploy-noloader.ps1 -Configuration RDYTU -IncludePlayerMods
 ```
 
 ---
@@ -101,7 +100,7 @@ Section `[RDYTU]` — **DEV.SDK ignores this section**.
 ## Verify install
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\verify-rdytu.ps1"
+.\scripts\verify-rdytu.ps1
 ```
 
 Manual checks:
@@ -109,26 +108,18 @@ Manual checks:
 - `NOLoader/core/NOLoader.Core.dll` — recent timestamp
 - No `NOLoader.Telemetry.dll` in core
 - `proxy.log` — bootstrap lines after launch
-- Optional: FPS baseline script `RDYTU/uninstall-for-fps-test.ps1` in CH scripts
 
 ---
 
 ## Uninstall / restore vanilla
 
-```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\RDYTU\uninstall-for-fps-test.ps1"
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\RDYTU\restore-after-fps-test.ps1"
-```
-
-Uninstall restores `Managed/*.dll` from `*.noloader.bak` and disables proxy.
+Restore `NuclearOption_Data/Managed/*.dll` from `*.noloader.bak`, remove NOLoader proxy and folder. See [INSTALL.md](INSTALL.md).
 
 ---
 
 ## GitHub release asset
 
-Download **NOLoader-0.1.0-RDYTU.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0). Contains pre-built core + proxy + INI + install README — no source required for players.
-
-Source code: full repository; build with `RDYTU` configuration.
+Download **NOLoader-0.1.0-RDYTU.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0). Contains pre-built core + proxy + INI + install README.
 
 ---
 
@@ -143,4 +134,4 @@ Source code: full repository; build with `RDYTU` configuration.
 | Gate L4 fullscreen banner | No | Yes |
 | Sample mods in deploy | No | Yes (RegistrySample, WeaponNames, …) |
 | Default physics hooks | Off | On (Rigidbody) |
-| Typical overhead | ~1 FPS (core) | Higher (diagnostics) |
+| Typical overhead | Low (core) | Higher (diagnostics) |

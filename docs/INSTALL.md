@@ -19,9 +19,9 @@ For channel-specific usage after install, see:
    - Remove `doorstop_config.ini` (BepInEx)
    - NOLoader uses its own proxy and `noloader_config.ini`
 
-Default game path:
+Typical game folder:
 
-`C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option\`
+`<SteamLibrary>\steamapps\common\Nuclear Option\`
 
 ---
 
@@ -30,10 +30,11 @@ Default game path:
 1. Download **NOLoader-0.1.0-RDYTU.zip** from [GitHub Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0).
 2. **Exit Nuclear Option completely.**
 3. Extract archive contents into the game root folder.
-4. Launch the game.
-5. Verify `NOLoader/logs/proxy.log` contains bootstrap lines.
+4. If this is a fresh install, run PatchTool once to apply Cecil markers (see Option B step 4, or use deploy script from a clone).
+5. Launch the game.
+6. Verify `NOLoader/logs/proxy.log` contains bootstrap lines.
 
-No build tools required.
+No build tools required for the zip contents themselves.
 
 ---
 
@@ -46,12 +47,10 @@ git clone https://github.com/Mursisru/NOLoader.git
 cd NOLoader
 ```
 
-Or use Engine path: `C:\Users\at747\source\repos\NOLoader_Engine`
-
 ### 2. Build native proxy
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\build-proxy.ps1"
+.\scripts\build-proxy.ps1
 ```
 
 Or manually:
@@ -81,30 +80,30 @@ dotnet build DEV.SDK\NOLoader.DEV_SDK.sln -c DEV_SDK
 **RDYTU:**
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\RDYTU\deploy-noloader.ps1"
+.\scripts\deploy-noloader.ps1 -Configuration RDYTU
 ```
 
 **DEV.SDK:**
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\deploy-noloader.ps1" -Configuration DEV_SDK
+.\scripts\deploy-noloader.ps1 -Configuration DEV_SDK
 ```
 
-Deploy copies DLLs, proxy, INI, runs **PatchTool** (Cecil) when game is not running.
+If the game is not in the default Steam path:
+
+```powershell
+.\scripts\deploy-noloader.ps1 -Configuration RDYTU -GameRoot "D:\Games\Nuclear Option"
+```
+
+Deploy copies DLLs, proxy, INI, and runs **PatchTool** (Cecil) when the game is not running.
 
 ### 5. Verify
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\verify-rdytu.ps1"
+.\scripts\verify-rdytu.ps1
 # or
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\verify-dev-sdk.ps1"
+.\scripts\verify-dev-sdk.ps1
 ```
-
----
-
-## Option C — Interim Doorstop (not recommended)
-
-If proxy cannot be built yet, you may temporarily point Unity Doorstop at Core — see legacy note in repository history. **Use Option A or B for production.**
 
 ---
 
@@ -124,13 +123,8 @@ PatchTool modifies (with backups `*.noloader.bak`):
 
 ## Uninstall
 
-1. Run FPS uninstall script (restores vanilla managed DLLs):
-
-```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\RDYTU\uninstall-for-fps-test.ps1"
-```
-
-2. Delete `NOLoader/` folder and `noloader_config.ini` if desired.
+1. Restore vanilla managed DLLs from backups in `NuclearOption_Data/Managed/` (rename `*.noloader.bak` back over patched files, or redeploy from a clean game backup).
+2. Remove `winhttp.dll` (NOLoader proxy), `noloader_config.ini`, and the `NOLoader/` folder if desired.
 3. Reinstall BepInEx separately if needed.
 
 ---

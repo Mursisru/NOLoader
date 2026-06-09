@@ -33,9 +33,9 @@ NOLoader validates mods and patches in layers. Failures at L1/L2 prevent bad man
 **Tools:**
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\bake-mod-patch-hashes.ps1"
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\bake-core-patch-hashes.ps1"
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\verify-core-patch-hashes.ps1"
+.\scripts\bake-mod-patch-hashes.ps1
+.\scripts\bake-core-patch-hashes.ps1
+.\scripts\verify-core-patch-hashes.ps1
 ```
 
 **BrokenMod** (DEV.SDK only): intentional bad patch for L2 testing — not deployed by default.
@@ -78,7 +78,7 @@ Inject runs in `RegistryGameBridge.OnEncyclopediaAfterLoad` (once per encycloped
 Diagnostic mods (`LoaderDiagMenu`, `LoaderDiag`) run structured probes and show **DONE** overlay. Not included in RDYTU deploy.
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\verify-noloader-logs.ps1"
+.\scripts\verify-noloader-logs.ps1
 ```
 
 Expected cold start: menu **DONE** → battle **DONE**; ring log contains `Core started`, `MainMenu hook fired`.

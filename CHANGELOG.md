@@ -12,14 +12,16 @@ All notable changes to NOLoader. Version strings in code: `AppVersion.cs` (`DEV1
 ### Documentation
 
 - Full README, ARCHITECTURE, RDYTU, DEV_SDK, MOD_AUTHOR, GATES, INSTALL
+- PowerShell scripts in `scripts/`
 
 ### RDYTU `0.1.0 Build RDY1R6`
 
 - Core-only deploy (no bundled player mods)
-- ~1 FPS overhead vs vanilla (field test, core only)
+- Low runtime overhead; core-only deploy (no bundled player mods)
 - Zero Update polling; mission via `sceneLoaded` when needed
 - Telemetry removed from RDYTU build
 - Performance INI defaults: ring_log off, physics hooks off
+- Hash-only mod pipeline (`pack-mod-rdytu.ps1`)
 
 ### DEV.SDK `0.1.0 Build DEV1PM19`
 

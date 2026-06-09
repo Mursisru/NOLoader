@@ -92,7 +92,7 @@ Player releases strip plain `id` and patch strings from shipped `mod.json`:
 Pack:
 
 ```powershell
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\pack-mod-rdytu.ps1" -ModFolder ... -OutputFolder ...
+.\scripts\pack-mod-rdytu.ps1 -ModFolder ... -OutputFolder ...
 ```
 
 ---

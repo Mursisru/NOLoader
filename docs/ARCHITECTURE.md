@@ -2,7 +2,7 @@
 
 Standalone mod loader for **Nuclear Option** (Unity Mono). Replaces BepInEx for new mods: native bootstrap → managed core → declarative `mod.json` → Mono.Cecil IL patches → validation gates.
 
-**Game API reference (mandatory for patches):** `C:\Users\at747\Desktop\CH\_Nuclear_Option_\Assembly-CSharp\` — never invent types or signatures.
+**Game API reference (mandatory for patches):** decompile `NuclearOption_Data/Managed/Assembly-CSharp.dll` from your game install (ILSpy, dnSpy, etc.) — never invent types or signatures.
 
 ---
 
@@ -43,11 +43,8 @@ sequenceDiagram
 | `DEV.SDK/` | Developer solution, sample mods, diag mods |
 | `RDYTU/` | Release solution (optimized core, no telemetry, no overlay) |
 | `deploy/` | `noloader_config.ini`, empty `mods/` README |
+| `scripts/` | Deploy, verify, hash baking, release zips |
 | `tests/` | Core + Patcher unit/integration tests |
-
-**Operational scripts** (deploy, verify, bake hashes) live outside the repo:
-
-`C:\Users\at747\Desktop\CH\_NOLoader_scripts_\`
 
 ---
 
@@ -172,7 +169,7 @@ Same source tree; `#if NOLoader_DEV` strips dev code from RDYTU binaries.
 
 ## Performance design (RDYTU)
 
-Measured baseline ~**1 FPS** vs vanilla (user field test, core only, no mods):
+RDYTU is tuned for low overhead with core only (no bundled mods):
 
 - No `MonoBehaviour.Update` polling (mission via `sceneLoaded` only when needed).
 - No telemetry DLL, no overlay, no hot-reload.
