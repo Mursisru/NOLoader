@@ -12,7 +12,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\NOLoader.Core\NOLoader.Core.csproj" />
     <ProjectReference Include="..\..\src\NOLoader.Patcher\NOLoader.Patcher.csproj" />
   </ItemGroup>
 </Project>

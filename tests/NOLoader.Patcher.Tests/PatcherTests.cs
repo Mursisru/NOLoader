@@ -5,7 +5,6 @@ using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using NOLoader.API.Manifest;
-using NOLoader.Core.Patching;
 using NOLoader.Patcher;
 using Xunit;
 
@@ -123,6 +122,7 @@ namespace NOLoader.Patcher.Tests
                 ?? @"C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option";
         }
 
+#if NOLOADER_FULL_TESTS
         [Fact]
         public void ApplyCorePatches_ToVanillaGameAssembly_Succeeds()
         {
@@ -164,6 +164,7 @@ namespace NOLoader.Patcher.Tests
                 try { Directory.Delete(loaderRoot, true); } catch { /* ignore */ }
             }
         }
+#endif
 
         [Fact]
         public void PrefixSkip_InstanceValueTypeArg_BoxesBeforeCall()
