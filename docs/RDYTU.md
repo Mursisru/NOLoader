@@ -2,7 +2,7 @@
 
 **Version:** `0.1.0 Build RDY1R6` (see `AppVersion.cs` when built with `RDYTU` configuration).
 
-RDYTU is the **optimized** build for players and end-user mod packs. No developer overlay, no UDP telemetry, no hot-reload, minimal runtime overhead.
+RDYTU is the **optimized managed** build (no telemetry, no overlay). **Both RDYTU and DEV.SDK use the same native `winhttp.dll` proxy** at runtime — that file is C++, but players get it pre-built in the release zip.
 
 ---
 

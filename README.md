@@ -81,10 +81,16 @@ Nuclear Option.exe
 
 ## Requirements
 
+### Players (GitHub zip)
+
 - **Nuclear Option** (Steam), Windows x64
-- **.NET Framework 4.8** SDK (to build)
-- **Visual Studio 2022** with C++ workload (native proxy)
-- Remove **BepInEx** bootstrap from game root before install
+- Remove **BepInEx** bootstrap from game root before install (`winhttp.dll`, `doorstop_config.ini`)
+- **No** Visual Studio, **no** .NET SDK — the release zip includes pre-built `winhttp.dll` and managed core DLLs
+
+### Build from source (RDYTU or DEV.SDK)
+
+- **.NET Framework 4.8 SDK** — managed core, PatchTool, mods
+- **Visual Studio 2022** with **Desktop development with C++** — only to **build** `native/NOLoader.Proxy` (`winhttp.dll`). Skip if you copy `winhttp.dll` from a [release zip](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0) or `artifacts/proxy/`
 
 Typical Steam install:
 

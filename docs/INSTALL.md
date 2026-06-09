@@ -11,13 +11,21 @@ For channel-specific usage after install, see:
 
 ## Prerequisites
 
-1. **Nuclear Option** installed (Steam).
-2. **.NET Framework 4.8 SDK** — to build from source.
-3. **Visual Studio 2022** with **Desktop development with C++** — to build `NOLoader.Proxy` (winhttp.dll).
-4. **Remove BepInEx bootstrap** from game root if present:
+### Option A — GitHub Release (players)
+
+1. **Nuclear Option** installed (Steam), Windows x64.
+2. **Remove BepInEx bootstrap** from game root if present:
    - Delete or rename BepInEx `winhttp.dll`
    - Remove `doorstop_config.ini` (BepInEx)
    - NOLoader uses its own proxy and `noloader_config.ini`
+
+**No build tools required** — the RDYTU zip already contains `winhttp.dll` and core DLLs.
+
+### Option B — Build from source
+
+1. Everything in Option A.
+2. **.NET Framework 4.8 SDK** — build managed projects and PatchTool.
+3. **Visual Studio 2022** with **Desktop development with C++** — only if you need to **compile** `NOLoader.Proxy`. Not required when installing from release zip or when reusing an existing `winhttp.dll`.
 
 Typical game folder:
 

@@ -72,6 +72,9 @@ jobs:
 
         run: ./scripts/verify-dev-sdk-ci.ps1
 
+        # GitHub runners do not have Nuclear Option installed. verify-dev-sdk-ci.ps1
+        # runs lite CI (API + Patcher + proxy) without game DLLs, or full build when game path exists.
+
 
 
   verify-local-full:
