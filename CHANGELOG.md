@@ -12,7 +12,6 @@ All notable changes to NOLoader. Version strings in code: `AppVersion.cs` (`DEV1
 ### Documentation
 
 - Full README, ARCHITECTURE, RDYTU, DEV_SDK, MOD_AUTHOR, GATES, INSTALL
-- Operational scripts moved to `CH\_NOLoader_scripts_\`
 
 ### RDYTU `0.1.0 Build RDY1R6`
 
@@ -21,7 +20,6 @@ All notable changes to NOLoader. Version strings in code: `AppVersion.cs` (`DEV1
 - Zero Update polling; mission via `sceneLoaded` when needed
 - Telemetry removed from RDYTU build
 - Performance INI defaults: ring_log off, physics hooks off
-- Hash-only mod pipeline (`pack-mod-rdytu.ps1`)
 
 ### DEV.SDK `0.1.0 Build DEV1PM19`
 
