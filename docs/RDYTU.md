@@ -126,7 +126,7 @@ Uninstall restores `Managed/*.dll` from `*.noloader.bak` and disables proxy.
 
 ## GitHub release asset
 
-Download **NOLoader-0.1.0-RDYTU.zip** from Releases (tag `v0.1.0-rdytu`). Contains pre-built core + proxy + INI + install README — no source required for players.
+Download **NOLoader-0.1.0-RDYTU.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0). Contains pre-built core + proxy + INI + install README — no source required for players.
 
 Source code: full repository; build with `RDYTU` configuration.
 

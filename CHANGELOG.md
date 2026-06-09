@@ -4,10 +4,10 @@ All notable changes to NOLoader. Version strings in code: `AppVersion.cs` (`DEV1
 
 ## GitHub Releases 0.1.0 (2026-06-09)
 
-### Release assets
+### Release assets (tag `v0.1.0`)
 
-- **v0.1.0-rdytu** — `NOLoader-0.1.0-RDYTU.zip` — player core (optimized, no telemetry, no bundled mods)
-- **v0.1.0-devsdk** — `NOLoader-0.1.0-DEV.SDK.zip` — developer core + telemetry + sample mod sources
+- **NOLoader-0.1.0-RDYTU.zip** — player core (optimized, no telemetry, no bundled mods)
+- **NOLoader-0.1.0-DEV.SDK.zip** — developer core + telemetry + sample mod sources
 
 ### Documentation
 

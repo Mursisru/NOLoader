@@ -133,7 +133,7 @@ Restore vanilla managed DLLs from `.noloader.bak` if needed, then redeploy.
 
 ## GitHub release asset
 
-Download **NOLoader-0.1.0-DEV.SDK.zip** from Releases (tag `v0.1.0-devsdk`). Contains DEV-built core + telemetry + proxy + sample mod sources/build outputs for mod authors.
+Download **NOLoader-0.1.0-DEV.SDK.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0). Contains DEV-built core + telemetry + proxy + sample mod sources/build outputs for mod authors.
 
 Full source repository recommended for development.
 

@@ -9,7 +9,7 @@ Standalone mod loader for **Nuclear Option** (Unity Mono). Replaces BepInEx for 
 
 **GitHub source mirror (pre-release):** `0.1.0 Build PR-R2PM1` — synced from Engine after release `0.1.0`; active Engine dev: `0.1.0 Build DEV2PM1`.
 
-**Semver (GitHub Releases):** `0.1.0` — see [Releases](https://github.com/Mursisru/NOLoader/releases) for `v0.1.0-rdytu` and `v0.1.0-devsdk` assets.
+**Semver (GitHub Releases):** `0.1.0` — tag [`v0.1.0`](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0) includes **two zip assets:** `NOLoader-0.1.0-RDYTU.zip` (player) and `NOLoader-0.1.0-DEV.SDK.zip` (mod authors).
 
 ---
 
@@ -96,7 +96,7 @@ Default game path: `C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option
 
 ### Option A — GitHub Release (players)
 
-1. Download **NOLoader-0.1.0-RDYTU.zip** from [Releases](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0-rdytu).
+1. Download **NOLoader-0.1.0-RDYTU.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0) (player asset in the same release as DEV.SDK).
 2. **Close the game.**
 3. Extract into the game root.
 4. Launch — check `NOLoader/logs/proxy.log`.

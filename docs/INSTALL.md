@@ -27,7 +27,7 @@ Default game path:
 
 ## Option A — GitHub Release (recommended for players)
 
-1. Download **NOLoader-0.1.0-RDYTU.zip** from [GitHub Releases](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0-rdytu).
+1. Download **NOLoader-0.1.0-RDYTU.zip** from [GitHub Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0).
 2. **Exit Nuclear Option completely.**
 3. Extract archive contents into the game root folder.
 4. Launch the game.
