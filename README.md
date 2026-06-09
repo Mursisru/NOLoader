@@ -83,10 +83,13 @@ Nuclear Option.exe
 
 ## Requirements
 
+**For player:**
 - **Nuclear Option** (Steam), Windows x64
+**For mod authors:**
 - **.NET Framework 4.8** SDK (to build)
 - **Visual Studio 2022** with C++ workload (native proxy)
-- Remove **BepInEx** bootstrap from game root before install
+**Note for users:**
+- Remove **another mod loader** bootstrap from game root before install (if you has it)
 
 Default game path: `C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option\`
 
@@ -94,22 +97,12 @@ Default game path: `C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option
 
 ## Installation
 
-### Option A — GitHub Release (players)
+### Download GitHub Release (players)
 
 1. Download **NOLoader-0.1.0-RDYTU.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0) (player asset in the same release as DEV.SDK).
 2. **Close the game.**
 3. Extract into the game root.
-4. Launch — check `NOLoader/logs/proxy.log`.
-
-### Option B — Build & deploy
-
-```powershell
-# RDYTU
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\RDYTU\deploy-noloader.ps1"
-
-# DEV.SDK
-& "C:\Users\at747\Desktop\CH\_NOLoader_scripts_\deploy-noloader.ps1" -Configuration DEV_SDK
-```
+4. Launch (if you need to check log - `NOLoader/logs/proxy.log`).
 
 **Full guide:** [docs/INSTALL.md](docs/INSTALL.md)
 
@@ -140,7 +133,7 @@ RDYTU section controls performance (ring log, physics hooks). DEV.SDK ignores `[
 
 ## Using mods
 
-See [docs/MOD_AUTHOR.md](docs/MOD_AUTHOR.md). Drop folders under `NOLoader/mods/`. RDYTU packs: `pack-mod-rdytu.ps1` in CH scripts.
+See [docs/MOD_AUTHOR.md](docs/MOD_AUTHOR.md). Drop folders under `NOLoader/mods/`.
 
 ---
 
@@ -151,14 +144,6 @@ dotnet build RDYTU\NOLoader.RDYTU.sln -c RDYTU
 dotnet build DEV.SDK\NOLoader.DEV_SDK.sln -c DEV_SDK
 dotnet test tests\NOLoader.Core.Tests\NOLoader.Core.Tests.csproj -c DEV_SDK
 ```
-
----
-
-## Operational scripts
-
-Canonical location: **`C:\Users\at747\Desktop\CH\_NOLoader_scripts_\`**
-
-Not stored in git — see [scripts/README.txt](scripts/README.txt).
 
 ---
 
@@ -184,7 +169,6 @@ Not stored in git — see [scripts/README.txt](scripts/README.txt).
 | No loader | Remove BepInEx winhttp; deploy proxy |
 | Patch fail | Close game; restore `.noloader.bak`; redeploy |
 | Gate L4 block | Fix mod error; check logs |
-| FPS test | `RDYTU/uninstall-for-fps-test.ps1` in CH scripts |
 
 ---
 
