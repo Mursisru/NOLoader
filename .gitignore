@@ -1,0 +1,17 @@
+# NOLoader
+
+*.swp
+bin/
+obj/
+.vs/
+*.user
+*.suo
+artifacts/
+**/x64/
+*.pdb
+*.obj
+*.iobj
+*.ipdb
+*.tlog/
+*.lastbuildstate
+*.recipe

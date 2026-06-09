@@ -1,0 +1,18 @@
+﻿[
+    {
+        "inject":  "NOLoader.UniversalLoadout.Patches::GetAvailableWeaponsPrefix",
+        "expectedSignatureHash":  "CE578CC411C69FD1",
+        "targetHash":  "20FA4355",
+        "method":  "Prefix",
+        "injectHash":  "8884AF90",
+        "target":  "WeaponChecker::GetAvailableWeaponsNonAlloc"
+    },
+    {
+        "inject":  "NOLoader.UniversalLoadout.Patches::VetLoadoutPrefix",
+        "expectedSignatureHash":  "7B29567661230597",
+        "targetHash":  "B276984A",
+        "method":  "Prefix",
+        "injectHash":  "1912E1F6",
+        "target":  "WeaponChecker::VetLoadout"
+    }
+]

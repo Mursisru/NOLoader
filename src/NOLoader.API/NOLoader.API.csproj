@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>NOLoader.API</RootNamespace>
+    <AssemblyName>NOLoader.API</AssemblyName>
+    <Version>0.1.0</Version>
+    <Authors>at747</Authors>
+    <Description>NOLoader mod author API for Nuclear Option</Description>
+    <PackageId>NOLoader.API</PackageId>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+</Project>

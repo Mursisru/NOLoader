@@ -1,0 +1,24 @@
+﻿{
+    "idHash":  1739372611,
+    "version":  "1.0.1",
+    "assembly":  "NOLoader.UniversalLoadout.dll",
+    "entryType":  "NOLoader.UniversalLoadout.UniversalLoadoutMod",
+    "loadStage":  "MainMenu",
+    "dependencies":  [
+
+                     ],
+    "patches":  [
+                    {
+                        "injectHash":  "8884AF90",
+                        "method":  "Prefix",
+                        "expectedSignatureHash":  "CE578CC411C69FD1",
+                        "targetHash":  "20FA4355"
+                    },
+                    {
+                        "injectHash":  "1912E1F6",
+                        "method":  "Prefix",
+                        "expectedSignatureHash":  "7B29567661230597",
+                        "targetHash":  "B276984A"
+                    }
+                ]
+}
