@@ -1,0 +1,11 @@
+{
+  "id": "com.at747.missileholdcam",
+  "guid": "a7b8c9d0e1f24365a7b8c9d0e1f20304",
+  "version": "1.0.2",
+  "name": "Missile Hold Cam",
+  "assembly": "NOLoader.MissileHoldCam.dll",
+  "entryType": "NOLoader.MissileHoldCam.MissileHoldCamMod",
+  "loadStage": "Mission",
+  "dependencies": [],
+  "patches": []
+}

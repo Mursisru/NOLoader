@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>NOLoader.Core</RootNamespace>
+    <AssemblyName>NOLoader.Core</AssemblyName>
+    <Configurations>Debug;Release;DEV_SDK;RDYTU</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='DEV_SDK'">
+    <DefineConstants>TRACE;NOLoader_DEV</DefineConstants>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='RDYTU'">
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Configuration)'=='DEV_SDK'">
+    <Compile Remove="Runtime\Perf\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil" Version="0.11.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NOLoader.API\NOLoader.API.csproj" />
+    <ProjectReference Include="..\NOLoader.Patcher\NOLoader.Patcher.csproj" />
+    <ProjectReference Include="..\NOLoader.Registry\NOLoader.Registry.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'=='DEV_SDK'">
+    <ProjectReference Include="..\NOLoader.Telemetry\NOLoader.Telemetry.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(NuclearOptionRoot)\NuclearOption_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(NuclearOptionRoot)\NuclearOption_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(NuclearOptionRoot)\NuclearOption_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

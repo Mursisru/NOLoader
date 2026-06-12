@@ -1,0 +1,11 @@
+{
+  "id": "com.at747.nuclearoption.vectoringtargethud",
+  "guid": "f6a7b8c9d0e14234b5c6d7e8f9012345",
+  "version": "1.0.1",
+  "name": "Vectoring Target HUD",
+  "assembly": "NOLoader.VectoringTargetHud.dll",
+  "entryType": "NOLoader.VectoringTargetHud.VectoringTargetHudMod",
+  "loadStage": "Mission",
+  "dependencies": ["com.at747.hudcommon"],
+  "patches": []
+}

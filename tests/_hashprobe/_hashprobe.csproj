@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net48</TargetFramework></PropertyGroup>
+  <ItemGroup><Reference Include="Mono.Cecil"><HintPath>..\..\src\NOLoader.Patcher\bin\RDYTU\net48\Mono.Cecil.dll</HintPath></Reference></ItemGroup>
+</Project>

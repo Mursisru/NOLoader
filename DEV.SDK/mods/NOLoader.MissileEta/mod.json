@@ -1,0 +1,11 @@
+{
+  "id": "com.at747.missileeta",
+  "guid": "c3d4e5f6a7b84990a1b2c3d4e5f60708",
+  "version": "2.0.0",
+  "name": "Missile ETA HUD",
+  "assembly": "NOLoader.MissileEta.dll",
+  "entryType": "NOLoader.MissileEta.MissileEtaMod",
+  "loadStage": "Mission",
+  "dependencies": ["com.at747.hudcommon"],
+  "patches": []
+}

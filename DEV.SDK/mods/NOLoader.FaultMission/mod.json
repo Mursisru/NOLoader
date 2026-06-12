@@ -1,0 +1,10 @@
+{
+  "id": "com.at747.faultmission",
+  "version": "0.0.1",
+  "name": "Fault Mission (Gate L4 test)",
+  "assembly": "NOLoader.FaultMission.dll",
+  "entryType": "NOLoader.FaultMission.FaultMissionEntry",
+  "loadStage": "MainMenu",
+  "dependencies": [],
+  "patches": []
+}

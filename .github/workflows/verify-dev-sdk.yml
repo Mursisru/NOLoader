@@ -1,0 +1,107 @@
+name: verify-dev-sdk
+
+
+
+on:
+
+  push:
+
+    paths:
+
+      - 'DEV.SDK/**'
+
+      - 'src/**'
+
+      - 'tests/**'
+
+      - 'scripts/verify-dev-sdk.ps1'
+
+      - 'scripts/verify-dev-sdk-ci.ps1'
+
+      - 'scripts/verify-core-patch-hashes.ps1'
+
+      - 'native/**'
+
+  pull_request:
+
+    paths:
+
+      - 'DEV.SDK/**'
+
+      - 'src/**'
+
+      - 'tests/**'
+
+      - 'scripts/verify-dev-sdk.ps1'
+
+      - 'scripts/verify-dev-sdk-ci.ps1'
+
+      - 'scripts/verify-core-patch-hashes.ps1'
+
+      - 'native/**'
+
+  workflow_dispatch:
+
+
+
+jobs:
+
+  ci-gates:
+
+    runs-on: windows-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+
+
+      - name: Setup .NET
+
+        uses: actions/setup-dotnet@v4
+
+        with:
+
+          dotnet-version: '8.0.x'
+
+
+
+      - name: DEV.SDK CI verify (build + unit tests + gate checks)
+
+        shell: pwsh
+
+        run: ./scripts/verify-dev-sdk-ci.ps1
+
+        # GitHub runners do not have Nuclear Option installed. verify-dev-sdk-ci.ps1
+        # runs lite CI (API + Patcher + proxy) without game DLLs, or full build when game path exists.
+
+
+
+  verify-local-full:
+
+    runs-on: windows-latest
+
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+
+
+      - name: Setup .NET
+
+        uses: actions/setup-dotnet@v4
+
+        with:
+
+          dotnet-version: '8.0.x'
+
+
+
+      - name: Full verify (requires Nuclear Option installed, game closed)
+
+        shell: pwsh
+
+        run: ./scripts/verify-dev-sdk.ps1 -SkipGameLaunch
+

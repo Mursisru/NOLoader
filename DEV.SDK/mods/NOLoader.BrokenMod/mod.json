@@ -1,0 +1,16 @@
+{
+  "id": "com.at747.brokenmod",
+  "version": "0.0.1",
+  "name": "Broken Mod (Gate L2 test)",
+  "assembly": "NonExistent.dll",
+  "entryType": "Broken.Entry",
+  "loadStage": "PreMenu",
+  "dependencies": [],
+  "patches": [
+    {
+      "target": "NonExistentType::MissingMethod",
+      "inject": "NOLoader.WeaponNames.Patches::AfterLoadPostfix",
+      "method": "Postfix"
+    }
+  ]
+}

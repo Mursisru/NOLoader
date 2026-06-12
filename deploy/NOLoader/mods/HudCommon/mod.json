@@ -1,0 +1,18 @@
+{
+  "id": "com.at747.hudcommon",
+  "guid": "a1b2c3d4e5f6478990abcdef01234567",
+  "version": "1.0.0",
+  "name": "NOLoader HUD Common",
+  "assembly": "NOLoader.HudCommon.dll",
+  "entryType": "NOLoader.HudCommon.HudCommonMod",
+  "loadStage": "MainMenu",
+  "dependencies": [],
+  "patches": [
+    {
+      "target": "FlightHud::Awake",
+      "inject": "NOLoader.HudCommon.Patches::AwakePostfix",
+      "method": "Postfix",
+      "expectedSignatureHash": "F7DC83C67DE889CB"
+    }
+  ]
+}

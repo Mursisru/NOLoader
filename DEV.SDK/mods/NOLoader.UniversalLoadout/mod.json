@@ -1,0 +1,24 @@
+{
+  "id": "com.at747.universalloadout",
+  "guid": "d4e5f6a7b8c94012a3b4c5d6e7f80402",
+  "version": "1.0.1",
+  "name": "Universal Loadout (any weapon on hardpoints)",
+  "assembly": "NOLoader.UniversalLoadout.dll",
+  "entryType": "NOLoader.UniversalLoadout.UniversalLoadoutMod",
+  "loadStage": "MainMenu",
+  "dependencies": [],
+  "patches": [
+    {
+      "target": "WeaponChecker::GetAvailableWeaponsNonAlloc",
+      "inject": "NOLoader.UniversalLoadout.Patches::GetAvailableWeaponsPrefix",
+      "method": "Prefix",
+      "expectedSignatureHash": "CE578CC411C69FD1"
+    },
+    {
+      "target": "WeaponChecker::VetLoadout",
+      "inject": "NOLoader.UniversalLoadout.Patches::VetLoadoutPrefix",
+      "method": "Prefix",
+      "expectedSignatureHash": "7B29567661230597"
+    }
+  ]
+}

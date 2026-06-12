@@ -1,0 +1,10 @@
+{
+  "id": "com.at747.registrysample",
+  "version": "1.0.0",
+  "name": "Registry Sample",
+  "assembly": "NOLoader.RegistrySample.dll",
+  "entryType": "NOLoader.RegistrySample.RegistrySampleMod",
+  "loadStage": "MainMenu",
+  "dependencies": [],
+  "patches": []
+}

@@ -1,0 +1,11 @@
+{
+  "id": "com.at747.missilelauncharchud",
+  "guid": "e5f6a7b8c9d04123a4b5c6d7e8f90123",
+  "version": "1.3.0",
+  "name": "Missile Launch Arc HUD",
+  "assembly": "NOLoader.MissileLaunchArcHud.dll",
+  "entryType": "NOLoader.MissileLaunchArcHud.MissileLaunchArcHudMod",
+  "loadStage": "Mission",
+  "dependencies": ["com.at747.hudcommon"],
+  "patches": []
+}

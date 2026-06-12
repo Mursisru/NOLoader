@@ -1,0 +1,30 @@
+{
+  "id": "com.at747.realweaponnames",
+  "guid": "b2c3d4e5f6a74890b1c2d3e4f5060708",
+  "version": "1.0.0",
+  "name": "Real Weapon Names (NATO QoL)",
+  "assembly": "NOLoader.RealWeaponNames.dll",
+  "entryType": "NOLoader.RealWeaponNames.RealWeaponNamesMod",
+  "loadStage": "MainMenu",
+  "dependencies": [],
+  "patches": [
+    { "target": "WeaponMount::Initialize", "inject": "NOLoader.RealWeaponNames.Patches::WeaponMountInitializePostfix", "method": "Postfix", "expectedSignatureHash": "435CDD12FB316992" },
+    { "target": "WeaponManager::RegisterWeapon", "inject": "NOLoader.RealWeaponNames.Patches::WeaponManagerRegisterWeaponPostfix", "method": "Postfix", "expectedSignatureHash": "F9243F496B7626E8" },
+    { "target": "WeaponSelector::PopulateOptions", "inject": "NOLoader.RealWeaponNames.Patches::WeaponSelectorPopulateOptionsPostfix", "method": "Postfix", "expectedSignatureHash": "5FF4B83E9DA371F4" },
+    { "target": "WeaponSelector::SetValue", "inject": "NOLoader.RealWeaponNames.Patches::WeaponSelectorSetValuePostfix", "method": "Postfix", "expectedSignatureHash": "D8E384A172ED6341" },
+    { "target": "WeaponSelector::DropdownChanged", "inject": "NOLoader.RealWeaponNames.Patches::WeaponSelectorDropdownChangedPostfix", "method": "Postfix", "expectedSignatureHash": "8BB0CCBF8D249162" },
+    { "target": "WeaponSelector::SetInteractable", "inject": "NOLoader.RealWeaponNames.Patches::WeaponSelectorSetInteractablePostfix", "method": "Postfix", "expectedSignatureHash": "4C0B5DADBDF7F37E" },
+    { "target": "LoadoutSelector::AssignAircraft", "inject": "NOLoader.RealWeaponNames.Patches::LoadoutSelectorAssignAircraftPostfix", "method": "Postfix", "expectedSignatureHash": "6AC920DBE9CAD317" },
+    { "target": "LoadoutSelector::LoadDefaults", "inject": "NOLoader.RealWeaponNames.Patches::LoadoutSelectorLoadDefaultsPostfix", "method": "Postfix", "expectedSignatureHash": "151E25F9C162DA46" },
+    { "target": "LoadoutSelector::UpdateWeapons", "inject": "NOLoader.RealWeaponNames.Patches::LoadoutSelectorUpdateWeaponsPostfix", "method": "Postfix", "expectedSignatureHash": "BD33F79D6B10AA31" },
+    { "target": "RadialMenuAction::SetWeapon", "inject": "NOLoader.RealWeaponNames.Patches::RadialMenuSetWeaponPostfix", "method": "Postfix", "expectedSignatureHash": "0B835DD6AFCF8E81" },
+    { "target": "RestrictedItem::SetItem", "inject": "NOLoader.RealWeaponNames.Patches::RestrictedItemSetItemPostfix", "method": "Postfix", "expectedSignatureHash": "8DC25D7FD51493B1" },
+    { "target": "WeaponIndicator::Refresh", "inject": "NOLoader.RealWeaponNames.Patches::WeaponIndicatorRefreshPostfix", "method": "Postfix", "expectedSignatureHash": "01E4212BDEE2012E" },
+    { "target": "WeaponStatus::UpdateDisplay", "inject": "NOLoader.RealWeaponNames.Patches::WeaponStatusUpdateDisplayPostfix", "method": "Postfix", "expectedSignatureHash": "1F30CD263C1513A1" },
+    { "target": "TargetMarker::ExtraSetup", "inject": "NOLoader.RealWeaponNames.Patches::TargetMarkerExtraSetupPostfix", "method": "Postfix", "expectedSignatureHash": "002870B1BFF7494F" },
+    { "target": "AircraftActionsReport::ReportText", "inject": "NOLoader.RealWeaponNames.Patches::AircraftActionsReportPrefix", "method": "Prefix", "expectedSignatureHash": "B291F81E8155FF9F" },
+    { "target": "EncyclopediaBrowser::SpawnUnit", "inject": "NOLoader.RealWeaponNames.Patches::EncyclopediaBrowserSpawnUnitPostfix", "method": "Postfix", "expectedSignatureHash": "E883819667755768" },
+    { "target": "EncyclopediaBrowser/WeaponStationDisplay::UpdateText", "inject": "NOLoader.RealWeaponNames.Patches::EncyclopediaWeaponPanelUpdateTextPostfix", "method": "Postfix", "expectedSignatureHash": "8F596FB06E4CAAF0" },
+    { "target": "Encyclopedia::AfterLoad", "inject": "NOLoader.RealWeaponNames.Patches::EncyclopediaAfterLoadPostfix", "method": "Postfix", "expectedSignatureHash": "E039721C070EB05F" }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "com.alex.autoflare",
+  "guid": "d5e6f7a8b9c04123d4e5f607182934ab",
+  "version": "1.2.0",
+  "name": "Auto-Flare System",
+  "assembly": "NOLoader.AutoFlare.dll",
+  "entryType": "NOLoader.AutoFlare.AutoFlareMod",
+  "loadStage": "Mission",
+  "dependencies": [],
+  "patches": [
+    {
+      "target": "Aircraft::FixedUpdate",
+      "inject": "NOLoader.AutoFlare.Patches::FixedUpdatePostfix",
+      "method": "Postfix",
+      "expectedSignatureHash": "EADCE32077415384",
+      "throttleEveryN": 4
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>NOLoader.PatchTool</RootNamespace>
+    <AssemblyName>NOLoader.PatchTool</AssemblyName>
+    <Configurations>Debug;Release;DEV_SDK;RDYTU</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='DEV_SDK'">
+    <DefineConstants>TRACE;NOLoader_DEV</DefineConstants>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='RDYTU'">
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NOLoader.Core\NOLoader.Core.csproj" />
+    <ProjectReference Include="..\NOLoader.Patcher\NOLoader.Patcher.csproj" />
+  </ItemGroup>
+</Project>

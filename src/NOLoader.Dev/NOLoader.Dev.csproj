@@ -1,0 +1,7 @@
+<!-- Placeholder: DEV-specific extensions live in NOLoader.Core/Development with #if NOLoader_DEV -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>NOLoader.Dev</AssemblyName>
+  </PropertyGroup>
+</Project>
