@@ -50,6 +50,9 @@ namespace NOLoader.Core
             LoaderRoot = Path.Combine(GameRoot, "NOLoader");
             Runtime.RuntimeConfig.Load(GameRoot);
             Directory.CreateDirectory(Path.Combine(LoaderRoot, "logs"));
+#if !NOLoader_DEV
+            Runtime.Balance.CoreBalancerBootstrap.Initialize();
+#endif
 
             ModAssemblyCache.Build(LoaderRoot, GameRoot);
             RingBufferLog.StartBackgroundFlush(LoaderRoot);
@@ -101,6 +104,7 @@ namespace NOLoader.Core
                 RingBufferLog.WriteAscii("[GateL1] " + err);
 
             ModPatchAssemblyPreloader.EnsureLoaded(manifests, LoaderRoot);
+            EngineTweaker.NOEngineTweakerBootstrap.Initialize();
             RingBufferLog.WriteAscii("[NOLoader] MainMenu hook fired (cache=" + ModAssemblyCache.EntryCount + ")");
 
             try

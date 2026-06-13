@@ -1,0 +1,11 @@
+{
+  "id": "com.at747.corebalancerverify",
+  "guid": "d9e6a4c305f864a2b0c7d8e9f1a2b345",
+  "version": "1.0.0",
+  "name": "CoreBalancer Verify",
+  "assembly": "NOLoader.CoreBalancerVerify.dll",
+  "entryType": "NOLoader.CoreBalancerVerify.CoreBalancerVerifyMod",
+  "loadStage": "Mission",
+  "dependencies": [],
+  "patches": []
+}

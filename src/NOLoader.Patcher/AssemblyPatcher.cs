@@ -111,12 +111,16 @@ namespace NOLoader.Patcher
 
         private static byte[]? _unitySnapshot;
         private static byte[]? _physicsSnapshot;
+        private static byte[]? _uiSnapshot;
 
         public static byte[]? LoadUnityCoreModuleBytes(string gameRoot)
             => LoadManagedModuleBytes(gameRoot, "UnityEngine.CoreModule.dll", ref _unitySnapshot);
 
         public static byte[]? LoadUnityPhysicsModuleBytes(string gameRoot)
             => LoadManagedModuleBytes(gameRoot, "UnityEngine.PhysicsModule.dll", ref _physicsSnapshot);
+
+        public static byte[]? LoadUnityUiModuleBytes(string gameRoot)
+            => LoadManagedModuleBytes(gameRoot, "UnityEngine.UI.dll", ref _uiSnapshot);
 
         public static PatchResult ApplyPatches(byte[] assemblyBytes, IReadOnlyList<PatchEntry> plan, string gameRoot, byte[]? rollbackSnapshot = null)
         {
@@ -247,7 +251,17 @@ namespace NOLoader.Patcher
             int throttleEveryN = entry.Descriptor.ThrottleEveryN;
             int patchSlotId = ComputePatchSlotId(entry);
 
-            if (string.Equals(entry.Descriptor.Method, "Prefix", StringComparison.OrdinalIgnoreCase)
+            if (string.Equals(entry.Descriptor.Method, "Redirect", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!TryValidateRedirectSignature(targetMethod, injectMethod, out string redirectError))
+                {
+                    errors.Add(redirectError);
+                    return false;
+                }
+
+                ApplyRedirectMethodBody(il, targetMethod, injectMethod, call);
+            }
+            else if (string.Equals(entry.Descriptor.Method, "Prefix", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(entry.Descriptor.Method, "PrefixSkip", StringComparison.OrdinalIgnoreCase))
             {
                 var prefixLoads = CreateInjectArgumentLoads(il, targetMethod, injectMethod);
@@ -307,6 +321,67 @@ namespace NOLoader.Patcher
             }
 
             return false;
+        }
+
+        private static bool TryValidateRedirectSignature(
+            MethodDefinition targetMethod,
+            MethodDefinition injectMethod,
+            out string error)
+        {
+            error = string.Empty;
+            if (!injectMethod.IsStatic)
+            {
+                error = "Redirect inject must be static.";
+                return false;
+            }
+
+            if (targetMethod.IsStatic != injectMethod.IsStatic)
+            {
+                error = "Redirect inject static/instance must match target.";
+                return false;
+            }
+
+            if (targetMethod.ReturnType.FullName != injectMethod.ReturnType.FullName)
+            {
+                error = "Redirect inject return type must match target.";
+                return false;
+            }
+
+            if (targetMethod.Parameters.Count != injectMethod.Parameters.Count)
+            {
+                error = "Redirect inject parameter count must match target.";
+                return false;
+            }
+
+            for (int i = 0; i < targetMethod.Parameters.Count; i++)
+            {
+                if (targetMethod.Parameters[i].ParameterType.FullName != injectMethod.Parameters[i].ParameterType.FullName)
+                {
+                    error = "Redirect inject parameter types must match target.";
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static void ApplyRedirectMethodBody(
+            ILProcessor il,
+            MethodDefinition targetMethod,
+            MethodDefinition injectMethod,
+            Instruction call)
+        {
+            targetMethod.Body.Instructions.Clear();
+            targetMethod.Body.ExceptionHandlers.Clear();
+            targetMethod.Body.Variables.Clear();
+
+            foreach (Instruction load in CreateInjectArgumentLoads(il, targetMethod, injectMethod))
+                targetMethod.Body.Instructions.Add(load);
+
+            targetMethod.Body.Instructions.Add(call);
+            targetMethod.Body.Instructions.Add(il.Create(OpCodes.Ret));
+            targetMethod.Body.InitLocals = injectMethod.Body.InitLocals;
+            targetMethod.Body.MaxStackSize = Math.Max(injectMethod.Body.MaxStackSize, (ushort)(targetMethod.Parameters.Count + 8));
         }
 
         private static TypeDefinition? FindTypeDefinition(AssemblyDefinition gameAsm, string typeName)

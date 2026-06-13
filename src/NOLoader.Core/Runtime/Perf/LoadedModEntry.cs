@@ -9,6 +9,11 @@ namespace NOLoader.Core.Runtime.Perf
         public INOModTickFast? Fast;
         public INOModTickNormal? Normal;
         public INOModTickSlow? Slow;
+        public INOModBackgroundWork? Background;
         public int DemoteLevel;
+        public ModWorkInput PendingInput;
+        public ModWorkOutput PendingOutput;
+        public bool HasPendingApply;
+        public bool OffloadActive;
     }
 }

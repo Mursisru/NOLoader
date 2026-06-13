@@ -1,0 +1,11 @@
+{
+  "id": "com.at747.computesample",
+  "guid": "c8d5f3b294e754b1b9f6e7d8c0b1a2345",
+  "version": "1.0.0",
+  "name": "Compute Sample",
+  "assembly": "NOLoader.ComputeSample.dll",
+  "entryType": "NOLoader.ComputeSample.ComputeSampleMod",
+  "loadStage": "Mission",
+  "dependencies": [],
+  "patches": []
+}

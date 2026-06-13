@@ -29,6 +29,10 @@ namespace NOLoader.Core.Patching
                 "NuclearOption.SceneLoading.MapLoader::CanLoad",
                 "NOLoader.Core.Gates.MissionGateHooks::CanLoadPrefixSkip", "PrefixSkip"));
 
+#if !NOLoader_DEV
+            plan.AddRange(EngineTweaker.EngineTweakerPatches.CreateGamePlan(coreDir));
+#endif
+
             return plan;
         }
 
@@ -58,6 +62,16 @@ namespace NOLoader.Core.Patching
                     "UnityEngine.Rigidbody::AddForce",
                     "NOLoader.Registry.PhysicsCatchHooks::RigidbodyAddForceSinglePrefixSkip", "PrefixSkip")
             };
+        }
+
+        public static List<PatchEntry> CreateUnityUiPlan(string loaderRoot)
+        {
+#if NOLoader_DEV
+            return new List<PatchEntry>();
+#else
+            string coreDir = Path.Combine(loaderRoot, "core");
+            return EngineTweaker.EngineTweakerPatches.CreateUnityUiPlan(coreDir);
+#endif
         }
 
         private static PatchEntry Entry(

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using NOLoader.API;
+using NOLoader.Core.EngineTweaker;
 using NOLoader.Core.Mods;
+using NOLoader.Core.Runtime.Balance;
 using UnityEngine;
 
 namespace NOLoader.Core.Runtime.Perf
@@ -12,6 +14,7 @@ namespace NOLoader.Core.Runtime.Perf
         private static readonly List<LoadedModEntry> NormalMods = new List<LoadedModEntry>();
         private static readonly List<LoadedModEntry> SlowMods = new List<LoadedModEntry>();
         private static float _nextSlowTime;
+        private static float _nextTweakerLogTime;
         private static int _normalFrame;
 
         public static bool HasTickMods =>
@@ -21,7 +24,7 @@ namespace NOLoader.Core.Runtime.Perf
         {
             if (entry.Fast != null && !FastMods.Contains(entry))
                 FastMods.Add(entry);
-            if (entry.Normal != null && !NormalMods.Contains(entry))
+            if ((entry.Normal != null || entry.Background != null) && !NormalMods.Contains(entry))
                 NormalMods.Add(entry);
             if (entry.Slow != null && !SlowMods.Contains(entry))
                 SlowMods.Add(entry);
@@ -43,6 +46,8 @@ namespace NOLoader.Core.Runtime.Perf
                 entry.Normal = normal;
             if (mod.Instance is INOModTickSlow slow)
                 entry.Slow = slow;
+            if (mod.Instance is INOModBackgroundWork background)
+                entry.Background = background;
             return entry;
         }
 
@@ -84,6 +89,12 @@ namespace NOLoader.Core.Runtime.Perf
                 return;
 
             _nextSlowTime = now + interval;
+            if (now >= _nextTweakerLogTime)
+            {
+                _nextTweakerLogTime = now + 30f;
+                NOEngineTweakerBootstrap.LogPeriodicStats();
+            }
+
             for (int i = 0; i < SlowMods.Count; i++)
             {
                 LoadedModEntry entry = SlowMods[i];
@@ -113,6 +124,17 @@ namespace NOLoader.Core.Runtime.Perf
 
         private static void InvokeNormal(LoadedModEntry entry, float dt)
         {
+            if (entry.Normal == null && entry.Background == null)
+                return;
+
+#if !NOLoader_DEV
+            if (entry.Background != null && Runtime.RuntimeConfig.CoreBalancerEnabled)
+            {
+                InvokeNormalBackground(entry, dt);
+                return;
+            }
+#endif
+
             if (entry.Normal == null)
                 return;
 
@@ -129,6 +151,60 @@ namespace NOLoader.Core.Runtime.Perf
 
             ModExecutionBudget.Instance.Record(entry.Mod.Manifest.IdHash, ElapsedMs(start));
         }
+
+#if !NOLoader_DEV
+        private static void InvokeNormalBackground(LoadedModEntry entry, float dt)
+        {
+            long start = Stopwatch.GetTimestamp();
+            var ctx = BuildContext(entry.Mod);
+
+            if (entry.HasPendingApply)
+            {
+                try
+                {
+                    ThreadGuard.AssertMainThread();
+                    entry.Background!.OnApplyResults(ref ctx, in entry.PendingOutput);
+                }
+                catch (System.Exception ex)
+                {
+                    ModLifecycleManager.FlagModForMissionBlock(Label(entry.Mod), ex);
+                }
+
+                entry.HasPendingApply = false;
+            }
+
+            ModWorkInput input = default;
+            try
+            {
+                ThreadGuard.AssertMainThread();
+                entry.Background!.OnCaptureInputs(ref ctx, ref input);
+                input.FrameId = Time.frameCount;
+            }
+            catch (System.Exception ex)
+            {
+                ModLifecycleManager.FlagModForMissionBlock(Label(entry.Mod), ex);
+                ModExecutionBudget.Instance.Record(entry.Mod.Manifest.IdHash, ElapsedMs(start));
+                return;
+            }
+
+            entry.PendingInput = input;
+            LoadedModEntry capturedEntry = entry;
+            NOMulticoreScheduler.Instance.RunCompute(
+                () =>
+                {
+                    ModWorkOutput output = default;
+                    output.FrameId = capturedEntry.PendingInput.FrameId;
+                    capturedEntry.Background!.OnCompute(in capturedEntry.PendingInput, ref output);
+                    capturedEntry.PendingOutput = output;
+                },
+                () =>
+                {
+                    capturedEntry.HasPendingApply = true;
+                });
+
+            ModExecutionBudget.Instance.Record(entry.Mod.Manifest.IdHash, ElapsedMs(start));
+        }
+#endif
 
         private static void InvokeSlow(LoadedModEntry entry, float dt)
         {
@@ -173,6 +249,29 @@ namespace NOLoader.Core.Runtime.Perf
         private static double ElapsedMs(long start)
         {
             return (Stopwatch.GetTimestamp() - start) * 1000.0 / Stopwatch.Frequency;
+        }
+
+        internal static bool TryGetEntryByHash(int modIdHash, out LoadedModEntry? entry)
+        {
+            entry = FindEntry(NormalMods, modIdHash);
+            if (entry != null)
+                return true;
+            entry = FindEntry(FastMods, modIdHash);
+            if (entry != null)
+                return true;
+            entry = FindEntry(SlowMods, modIdHash);
+            return entry != null;
+        }
+
+        private static LoadedModEntry? FindEntry(List<LoadedModEntry> list, int modIdHash)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Mod.Manifest.IdHash == modIdHash)
+                    return list[i];
+            }
+
+            return null;
         }
 
         internal static void SetDemoteLevel(int modIdHash, int level)

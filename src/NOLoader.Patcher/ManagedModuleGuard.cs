@@ -20,6 +20,9 @@ namespace NOLoader.Patcher
             "NOLoader.AutoFlare",
             "NOLoader.HudCommon",
             "NOLoader.RepeatTakeoffMusic",
+            "NOEngineTweakerHooks",
+            "PerfTestPatches",
+            "ThrustPrefix",
         };
 
         public static string GetLivePath(string gameRoot, string moduleFile)

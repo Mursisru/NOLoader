@@ -7,5 +7,6 @@ namespace NOLoader.API
         public INOModArrayPool Pool;
         public INOModWorldReader? World;
         public IModExecutionBudgetView? Budget;
+        public INOModFrameCache? FrameCache;
     }
 }

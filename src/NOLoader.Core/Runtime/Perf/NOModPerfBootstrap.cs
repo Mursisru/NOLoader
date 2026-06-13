@@ -1,5 +1,6 @@
 using NOLoader.API;
 using NOLoader.API.World;
+using NOLoader.Core.Runtime.Balance;
 
 namespace NOLoader.Core.Runtime.Perf
 {
@@ -10,6 +11,9 @@ namespace NOLoader.Core.Runtime.Perf
             NOModRuntime.Pool = NOModArrayPoolImpl.Instance;
             NOModRuntime.Budget = ModExecutionBudget.Instance;
             NOModRuntime.ActivateWorldCallback = () => WorldSnapshotService.Instance.Activate();
+#if !NOLoader_DEV
+            CoreBalancerBootstrap.Initialize();
+#endif
         }
 
         public static NOModServices CreateServices(bool requestWorld)
@@ -22,7 +26,8 @@ namespace NOLoader.Core.Runtime.Perf
             {
                 Pool = NOModArrayPoolImpl.Instance,
                 World = world,
-                Budget = ModExecutionBudget.Instance
+                Budget = ModExecutionBudget.Instance,
+                FrameCache = NOModRuntime.FrameCache
             };
         }
 

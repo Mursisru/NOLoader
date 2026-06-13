@@ -80,6 +80,11 @@ namespace NOLoader.PatchTool
             RuntimeConfig.Load(gameRoot);
             string loaderRoot = Path.Combine(gameRoot, "NOLoader");
 
+            // Rebase Assembly-CSharp on immutable vanilla before applying the current plan.
+            // Prevents stale DEV / mod-test IL (Motor::Thrust, PerfTest, MechanicsTest) from accumulating.
+            if (ManagedModuleGuard.TryRestoreVanilla(gameRoot, "Assembly-CSharp.dll"))
+                Console.WriteLine("Rebased Assembly-CSharp.dll on vanilla snapshot before patch plan");
+
             foreach (string module in new[] { "Assembly-CSharp.dll", "UnityEngine.CoreModule.dll", "UnityEngine.PhysicsModule.dll" })
             {
                 if (ManagedModuleGuard.TryPurgeInvalidVanillaBackup(gameRoot, module))
@@ -109,6 +114,20 @@ namespace NOLoader.PatchTool
             else
             {
                 errors += ApplyModule(gameRoot, loaderRoot, "UnityEngine.PhysicsModule.dll", physicsPlan);
+            }
+
+            var uiPlan = CoreBootstrapPatches.CreateUnityUiPlan(loaderRoot);
+            if (uiPlan.Count == 0)
+            {
+                if (AssemblyPatcher.RestoreManagedModuleFromBackup(gameRoot, "UnityEngine.UI.dll"))
+                {
+                    Console.WriteLine("Restored UnityEngine.UI.dll (canvas_limiter=0)");
+                    ClearUiPatchState(loaderRoot);
+                }
+            }
+            else
+            {
+                errors += ApplyModule(gameRoot, loaderRoot, "UnityEngine.UI.dll", uiPlan);
             }
 
             errors += ApplyModAssemblyPatches(gameRoot, loaderRoot);
@@ -183,6 +202,11 @@ namespace NOLoader.PatchTool
             PatchStateCache.Record(loaderRoot, "UnityEngine.PhysicsModule.dll", Array.Empty<string>());
         }
 
+        private static void ClearUiPatchState(string loaderRoot)
+        {
+            PatchStateCache.Record(loaderRoot, "UnityEngine.UI.dll", Array.Empty<string>());
+        }
+
         private static int ApplyModule(string gameRoot, string loaderRoot, string moduleFile, List<PatchEntry> plan)
         {
             if (plan.Count == 0)
@@ -232,7 +256,8 @@ namespace NOLoader.PatchTool
             {
                 "Assembly-CSharp.dll",
                 "UnityEngine.CoreModule.dll",
-                "UnityEngine.PhysicsModule.dll"
+                "UnityEngine.PhysicsModule.dll",
+                "UnityEngine.UI.dll"
             };
 
             int missing = 0;

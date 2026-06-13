@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using NOLoader.API;
 using NOLoader.Core.Logging;
+using NOLoader.Core.Runtime;
+using NOLoader.Core.Runtime.Balance;
 using UnityEngine;
 
 namespace NOLoader.Core.Runtime.Perf
@@ -34,9 +36,16 @@ namespace NOLoader.Core.Runtime.Perf
             if (!ModTickScheduler.HasTickMods)
                 return;
 
+            double frameMs = _frameMs;
+            MainThreadMetrics.RecordFrameMs(frameMs);
+            MainThreadMetrics.TryLogPeriodic();
+
             double budget = RuntimeConfig.ModBudgetMs;
             if (budget <= 0)
+            {
+                _frameMs = 0;
                 return;
+            }
 
             if (_frameMs <= budget)
             {
@@ -48,11 +57,49 @@ namespace NOLoader.Core.Runtime.Perf
             else
             {
                 _stableSince = -1f;
+#if !NOLoader_DEV
+                if (!TryOffloadInsteadOfDemote())
+                    DemoteHeaviest();
+#else
                 DemoteHeaviest();
+#endif
             }
 
             _frameMs = 0;
         }
+
+#if !NOLoader_DEV
+        private bool TryOffloadInsteadOfDemote()
+        {
+            if (!RuntimeConfig.CoreBalancerEnabled)
+                return false;
+
+            int bestHash = 0;
+            double bestMs = 0;
+            foreach (KeyValuePair<int, double> kv in _emaMs)
+            {
+                if (kv.Value > bestMs)
+                {
+                    bestMs = kv.Value;
+                    bestHash = kv.Key;
+                }
+            }
+
+            if (bestHash == 0)
+                return false;
+
+            if (!ModTickScheduler.TryGetEntryByHash(bestHash, out LoadedModEntry? entry) || entry == null)
+                return false;
+
+            if (entry.Background == null || entry.OffloadActive)
+                return false;
+
+            entry.OffloadActive = true;
+            RingBufferLog.WriteAscii("[CoreBalancer] offload mod=" + bestHash.ToString("X8")
+                + " queue=" + NOMulticoreScheduler.Instance.QueueDepth);
+            return true;
+        }
+#endif
 
         private void DemoteHeaviest()
         {

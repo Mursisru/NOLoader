@@ -6,6 +6,8 @@ using NOLoader.API;
 using NOLoader.API.World;
 using NOLoader.Core.Interop;
 using NOLoader.Core.Logging;
+using NOLoader.Core.Runtime;
+using NOLoader.Core.Runtime.Balance;
 using UnityEngine;
 
 namespace NOLoader.Core.Runtime.Perf
@@ -29,6 +31,10 @@ namespace NOLoader.Core.Runtime.Perf
         private MethodInfo? _getLocalAircraft;
         private object? _localAircraft;
         private int _localAircraftId;
+        private DoubleBufferHub<WorldSnapshotPacket>? _published;
+        private readonly WorldSnapshotPublishedReader _publishedReader = new WorldSnapshotPublishedReader();
+
+        internal INOModWorldReader PublishedReader => _publishedReader;
 
         public bool IsActive => _active;
 
@@ -47,6 +53,9 @@ namespace NOLoader.Core.Runtime.Perf
         {
             _active = true;
             NOModRuntime.World = this;
+#if !NOLoader_DEV
+            NOModRuntime.StableWorld = _publishedReader;
+#endif
             ResolveGameApi();
             ModRuntimeHost.EnsureInstalled();
             return this;
@@ -104,6 +113,28 @@ namespace NOLoader.Core.Runtime.Perf
 
             _count = written;
             _frameId++;
+            PublishStableCopy();
+        }
+
+        private void PublishStableCopy()
+        {
+#if !NOLoader_DEV
+            if (!RuntimeConfig.CoreBalancerEnabled || !RuntimeConfig.DoubleBufferEnabled)
+                return;
+
+            if (_published == null)
+            {
+                _published = new DoubleBufferHub<WorldSnapshotPacket>(
+                    new WorldSnapshotPacket(Array.Empty<NOWorldUnit>(), 0, 0));
+                _publishedReader.Bind(_published);
+            }
+
+            var copy = new NOWorldUnit[_count];
+            if (_count > 0)
+                Array.Copy(_units, copy, _count);
+
+            _published.Publish(new WorldSnapshotPacket(copy, _count, _frameId));
+#endif
         }
 
         private void RefreshLocalAircraft()
@@ -244,6 +275,42 @@ namespace NOLoader.Core.Runtime.Perf
                 if (method != null && method.IsGenericMethod == false)
                     _getLocalAircraft = method;
             }
+        }
+    }
+
+    internal sealed class WorldSnapshotPacket
+    {
+        internal WorldSnapshotPacket(NOWorldUnit[] units, int count, int frameId)
+        {
+            Units = units;
+            Count = count;
+            FrameId = frameId;
+        }
+
+        internal NOWorldUnit[] Units { get; }
+        internal int Count { get; }
+        internal int FrameId { get; }
+    }
+
+    internal sealed class WorldSnapshotPublishedReader : INOModWorldReader
+    {
+        private DoubleBufferHub<WorldSnapshotPacket>? _hub;
+
+        internal void Bind(DoubleBufferHub<WorldSnapshotPacket> hub) => _hub = hub;
+
+        public int FrameId => _hub?.ReadPublished().FrameId ?? 0;
+
+        public int UnitCount => _hub?.ReadPublished().Count ?? 0;
+
+        public NOWorldUnit GetUnit(int index)
+        {
+            if (_hub == null)
+                return default;
+
+            WorldSnapshotPacket packet = _hub.ReadPublished();
+            if (index < 0 || index >= packet.Count)
+                return default;
+            return packet.Units[index];
         }
     }
 }

@@ -12,7 +12,14 @@ namespace NOLoader.API
 
         public static INOModWorldReader? World { get; internal set; }
 
+        /// <summary>Immutable published world copy for worker-side reads (CoreBalancer double-buffer).</summary>
+        public static INOModWorldReader? StableWorld { get; internal set; }
+
+        public static INOModFrameCache? FrameCache { get; internal set; }
+
         public static IModExecutionBudgetView? Budget { get; internal set; }
+
+        public static INOModComputeScheduler Scheduler { get; internal set; } = NOModComputeSchedulerStub.Instance;
 
         internal static Func<INOModWorldReader>? ActivateWorldCallback { get; set; }
 

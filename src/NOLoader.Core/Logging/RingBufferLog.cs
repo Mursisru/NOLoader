@@ -101,6 +101,9 @@ namespace NOLoader.Core.Logging
 
         private static void FlushLoop()
         {
+#if !NOLoader_DEV
+            Runtime.Balance.CoreBalancerBootstrap.PinThreadForBackgroundWork();
+#endif
             while (_running)
             {
                 Thread.Sleep(_flushIntervalMs);

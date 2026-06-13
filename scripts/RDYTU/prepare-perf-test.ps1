@@ -1,6 +1,7 @@
 param(
     [switch]$NoMods,
     [switch]$PerfTestOnly,
+    [switch]$MechanicsVerifyOnly,
     [string]$GameRoot = "C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option"
 )
 
@@ -24,6 +25,15 @@ if ($NoMods) {
     }
     Write-Host "Perf test stage A: mods folder cleared."
 }
+elseif ($MechanicsVerifyOnly) {
+    Get-ChildItem -Path $modsRoot -Directory | Where-Object { $_.Name -ne "MechanicsVerify" } | ForEach-Object {
+        if (-not (Test-Path $stashRoot)) {
+            New-Item -ItemType Directory -Path $stashRoot -Force | Out-Null
+        }
+        Move-Item -Path $_.FullName -Destination (Join-Path $stashRoot $_.Name) -Force
+    }
+    Write-Host "Field test stage: only MechanicsVerify/ should remain."
+}
 elseif ($PerfTestOnly) {
     if (Test-Path $stashRoot) {
         Get-ChildItem -Path $stashRoot -Directory | ForEach-Object {
@@ -45,7 +55,7 @@ elseif ($PerfTestOnly) {
     Write-Host "Perf test stage B: only PerfTest/ should remain."
 }
 else {
-    Write-Host "Use -NoMods or -PerfTestOnly"
+    Write-Host "Use -NoMods, -PerfTestOnly, or -MechanicsVerifyOnly"
     exit 1
 }
 

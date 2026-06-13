@@ -29,6 +29,24 @@ namespace NOLoader.Core.Runtime
         /// <summary>RDYTU perf: combined mod budget per frame (ms).</summary>
         public static double ModBudgetMs { get; private set; } = 0.5;
 
+        /// <summary>Master switch for NOEngineTweaker IL patches (RDYTU).</summary>
+        public static bool EngineTweakerEnabled { get; private set; }
+        public static bool StringCacheEnabled { get; private set; }
+        public static bool HudRefreshSkipEnabled { get; private set; }
+        public static bool CullingOptimizerEnabled { get; private set; }
+        public static bool FrameCacheEnabled { get; private set; }
+        public static bool CanvasLimiterEnabled { get; private set; }
+        public static float CullDistanceM { get; private set; } = 5000f;
+        public static float DisplayDetailMin { get; private set; } = 1f;
+        public static int StringCacheMax { get; private set; } = 2000;
+
+        public static bool CoreBalancerEnabled { get; private set; }
+        public static int ModWorkerCount { get; private set; } = 0;
+        public static string ModAffinityMask { get; private set; } = "auto";
+        public static string MainThreadAffinity { get; private set; } = "0";
+        public static bool DoubleBufferEnabled { get; private set; } = true;
+        public static double ModComputeBudgetMs { get; private set; } = 2.0;
+
 #if NOLoader_DEV
         /// <summary>UDP Sim-Connect telemetry (DEV.SDK only).</summary>
         public static int TelemetryCaptureStride { get; private set; } = 1;
@@ -124,6 +142,62 @@ namespace NOLoader.Core.Runtime
                     if (double.TryParse(value, System.Globalization.NumberStyles.Float,
                             System.Globalization.CultureInfo.InvariantCulture, out double budget) && budget > 0)
                         ModBudgetMs = budget;
+                    break;
+                case "engine_tweaker":
+                    EngineTweakerEnabled = ParseBool(value, EngineTweakerEnabled);
+                    break;
+                case "string_cache":
+                    StringCacheEnabled = ParseBool(value, StringCacheEnabled);
+                    break;
+                case "hud_refresh_skip":
+                    HudRefreshSkipEnabled = ParseBool(value, HudRefreshSkipEnabled);
+                    break;
+                case "culling_optimizer":
+                    CullingOptimizerEnabled = ParseBool(value, CullingOptimizerEnabled);
+                    break;
+                case "frame_cache":
+                    FrameCacheEnabled = ParseBool(value, FrameCacheEnabled);
+                    break;
+                case "canvas_limiter":
+                    CanvasLimiterEnabled = ParseBool(value, CanvasLimiterEnabled);
+                    break;
+                case "cull_distance_m":
+                    if (float.TryParse(value, System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out float cull) && cull > 100f)
+                        CullDistanceM = cull;
+                    break;
+                case "display_detail_min":
+                    if (float.TryParse(value, System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out float detailMin) && detailMin >= 0f)
+                        DisplayDetailMin = detailMin;
+                    break;
+                case "string_cache_max":
+                    if (int.TryParse(value, out int cacheMax) && cacheMax >= 256)
+                        StringCacheMax = cacheMax;
+                    break;
+                case "core_balancer":
+                    CoreBalancerEnabled = ParseBool(value, CoreBalancerEnabled);
+                    break;
+                case "mod_worker_count":
+                    if (int.TryParse(value, out int workerCount) && workerCount >= 1 && workerCount <= 8)
+                        ModWorkerCount = workerCount;
+                    break;
+                case "mod_affinity_mask":
+                    if (!string.IsNullOrWhiteSpace(value))
+                        ModAffinityMask = value.Trim();
+                    break;
+                case "main_thread_affinity":
+                    if (!string.IsNullOrWhiteSpace(value))
+                        MainThreadAffinity = value.Trim();
+                    break;
+                case "double_buffer":
+                    DoubleBufferEnabled = ParseBool(value, DoubleBufferEnabled);
+                    break;
+                case "mod_compute_budget_ms":
+                    if (double.TryParse(value, System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out double computeBudget)
+                        && computeBudget > 0)
+                        ModComputeBudgetMs = computeBudget;
                     break;
             }
         }

@@ -1,0 +1,11 @@
+{
+  "id": "com.at747.mechanicsverify",
+  "guid": "b7c4e2a193d64f0a8e5d6c7b8a9f0123",
+  "version": "1.0.0",
+  "name": "Mechanics Verify",
+  "assembly": "NOLoader.MechanicsVerify.dll",
+  "entryType": "NOLoader.MechanicsVerify.MechanicsVerifyMod",
+  "loadStage": "Mission",
+  "dependencies": [],
+  "patches": []
+}
