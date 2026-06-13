@@ -64,7 +64,12 @@ namespace NOLoader.Core.GpuRender
             if (camera == null || camera.cameraType != CameraType.Game)
                 return;
 
-            if (RuntimeConfig.GpuHudPassEnabled && _material != null && _quad != null)
+            bool hudDraw = RuntimeConfig.GpuHudPassEnabled && _material != null && _quad != null;
+            bool gpuMods = GpuComputeService.Instance.HasRegisteredMods;
+            if (!hudDraw && !gpuMods)
+                return;
+
+            if (hudDraw)
             {
                 _lastDrawn = Matrices.Count;
                 if (_lastDrawn > 0)
@@ -79,7 +84,8 @@ namespace NOLoader.Core.GpuRender
                 }
             }
 
-            DispatchModCompute(context);
+            if (gpuMods)
+                DispatchModCompute(context);
         }
 
         private static void DispatchModCompute(ScriptableRenderContext context)

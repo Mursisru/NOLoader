@@ -2,7 +2,8 @@ param(
     [string]$GameRoot = "C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option",
     [string]$Configuration = "RDYTU",
     [switch]$KeepOtherMods,
-    [switch]$EnableCollisionLayers
+    [switch]$EnableCollisionLayers,
+    [switch]$FullProbe
 )
 
 $ErrorActionPreference = "Stop"
@@ -34,7 +35,16 @@ Copy-Item -Force (Join-Path $RepoRoot "DEV.SDK\mods\NOLoader.ModOptimizerVerify\
 
 $iniSrc = Join-Path $RepoRoot "DEV.SDK\mods\NOLoader.ModOptimizerVerify\mod.ini"
 $iniDst = Join-Path $modRoot "mod.ini"
-if (-not (Test-Path $iniDst)) { Copy-Item -Force $iniSrc $iniDst }
+Copy-Item -Force $iniSrc $iniDst
+if ($FullProbe) {
+    $iniText = Get-Content $iniDst -Raw
+    if ($iniText -match '(?m)^spawn_count\s*=') {
+        $iniText = $iniText -replace '(?m)^spawn_count\s*=.*', 'spawn_count=30'
+    } else {
+        $iniText = $iniText.TrimEnd() + "`r`nspawn_count=30`r`n"
+    }
+    Set-Content -Path $iniDst -Value $iniText -NoNewline
+}
 
 & (Join-Path $RepoRoot "scripts\pack-mod-rdytu.ps1") -ModFolder $modRoot
 
@@ -55,4 +65,4 @@ if (Test-Path $noloaderIni) {
     Set-Content -Path $noloaderIni -Value $content -NoNewline
 }
 
-Write-Host "ModOptimizer verify mod deployed to $modRoot (DEV4O1)"
+Write-Host "ModOptimizer verify mod deployed to $modRoot (DEV4O2 lite=$([int](-not $FullProbe)))"

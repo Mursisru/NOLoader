@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 using NOLoader.API;
 using UnityEngine;
@@ -13,11 +14,13 @@ namespace NOLoader.ModOptimizerVerify
                 return;
 
             ModOptimizerVerifyState.OnLoadLogged = true;
+            ModOptimizerVerifyState.TargetSpawnCount = ResolveSpawnCount(ctx.ModRoot);
             ModOptimizerVerifyLogger.Phase("OnLoad");
-            ModOptimizerVerifyLogger.Info("mod=" + ctx.ModId + " DEV4O1 field test (NOModOptimizer)");
+            ModOptimizerVerifyLogger.Info("mod=" + ctx.ModId + " DEV4O2 field test (NOModOptimizer)");
             ModOptimizerVerifyLogger.Pass("manifest", "tick interfaces only (no magic Update)");
             ModOptimizerVerifyLogger.Info("covers: reflectionBake warmup sceneLocator Find redirect collision");
-            ModOptimizerVerifyLogger.Info("ini: mod_optimizer=1; full matrix: deploy -EnableCollisionLayers");
+            ModOptimizerVerifyLogger.Info("spawn_count=" + ModOptimizerVerifyState.TargetSpawnCount + " (lite=3, full=30 via mod.ini)");
+            ModOptimizerVerifyLogger.Info("ini: mod_optimizer=1; full matrix: deploy -EnableCollisionLayers -FullProbe");
             ModOptimizerVerifyLogger.Info("parse: scripts\\RDYTU\\parse-modoptimizer-ringlog.ps1");
         }
 
@@ -26,7 +29,7 @@ namespace NOLoader.ModOptimizerVerify
             if (ModOptimizerVerifyState.SpawnedCount > 0)
                 return;
 
-            const int count = 30;
+            int count = ModOptimizerVerifyState.TargetSpawnCount;
             for (int i = 0; i < count; i++)
             {
                 string name = "ModOptProxy_" + i.ToString("D2");
@@ -128,15 +131,16 @@ namespace NOLoader.ModOptimizerVerify
             if (ModOptimizerVerifyState.PassLogged)
                 return;
 
+            int target = ModOptimizerVerifyState.TargetSpawnCount;
             if (!ModOptimizerVerifyState.ReflectionDelegateOk
                 || !ModOptimizerVerifyState.SceneLocatorOk
                 || !ModOptimizerVerifyState.FindRedirectOk
-                || ModOptimizerVerifyState.SpawnedCount < 30)
+                || ModOptimizerVerifyState.SpawnedCount < target)
                 return;
 
             ModOptimizerVerifyState.PassLogged = true;
             string collisionNote = ModOptimizerVerifyState.CollisionLayerOk ? "collision=1" : "collision=opt-in";
-            ModOptimizerVerifyLogger.Pass("mod_optimizer", "spawn=30 reflection scene find " + collisionNote);
+            ModOptimizerVerifyLogger.Pass("mod_optimizer", "spawn=" + target + " reflection scene find " + collisionNote);
         }
 
         internal static void LogPeriodic()
@@ -156,6 +160,45 @@ namespace NOLoader.ModOptimizerVerify
                 + " scene=" + ModOptimizerVerifyState.SceneLocatorOk
                 + " find=" + ModOptimizerVerifyState.FindRedirectOk
                 + " collisionLayer=" + ModOptimizerVerifyState.CollisionLayerOk);
+        }
+
+        private static int ResolveSpawnCount(string modRoot)
+        {
+            try
+            {
+                string path = Path.Combine(modRoot, "mod.ini");
+                if (!File.Exists(path))
+                    return ModOptimizerVerifyState.DefaultSpawnCount;
+
+                bool inVerifySection = false;
+                foreach (string raw in File.ReadAllLines(path))
+                {
+                    string line = raw.Trim();
+                    if (line.Length == 0 || line.StartsWith(";", StringComparison.Ordinal))
+                        continue;
+
+                    if (line.StartsWith("[", StringComparison.Ordinal))
+                    {
+                        inVerifySection = string.Equals(line, "[verify]", StringComparison.OrdinalIgnoreCase);
+                        continue;
+                    }
+
+                    if (!inVerifySection && !line.StartsWith("spawn_count=", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (line.StartsWith("spawn_count=", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string value = line.Substring("spawn_count=".Length).Trim();
+                        if (int.TryParse(value, out int count) && count > 0 && count <= ModOptimizerVerifyState.FullSpawnCount)
+                            return count;
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return ModOptimizerVerifyState.DefaultSpawnCount;
         }
     }
 }

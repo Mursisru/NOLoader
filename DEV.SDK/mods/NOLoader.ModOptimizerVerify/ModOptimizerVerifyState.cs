@@ -4,8 +4,12 @@ namespace NOLoader.ModOptimizerVerify
 {
     internal static class ModOptimizerVerifyState
     {
+        internal const int DefaultSpawnCount = 3;
+        internal const int FullSpawnCount = 30;
+
         internal static bool OnLoadLogged;
         internal static int SlowCount;
+        internal static int TargetSpawnCount = DefaultSpawnCount;
         internal static int SpawnedCount;
         internal static int ReflectionPingCount;
         internal static bool ReflectionDelegateOk;

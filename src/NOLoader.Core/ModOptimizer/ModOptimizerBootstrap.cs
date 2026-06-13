@@ -28,7 +28,7 @@ namespace NOLoader.Core.ModOptimizer
         internal static bool IsShaderWarmupActive =>
             IsActive && RuntimeConfig.ModShaderWarmupEnabled;
 
-        internal static void Initialize()
+        internal static void Initialize(string gameRoot)
         {
             if (_initialized)
                 return;
@@ -40,6 +40,9 @@ namespace NOLoader.Core.ModOptimizer
                 RingBufferLog.WriteAscii("[ModOpt] disabled (mod_optimizer=0)");
                 return;
             }
+
+            if (RuntimeConfig.ModSceneLocatorEnabled)
+                ModNativeGameObjectFind.Initialize(gameRoot);
 
             NOModRuntime.Reflection = ModReflectionCache.Instance;
             NOModRuntime.Scene = ModSceneLocator.Instance;

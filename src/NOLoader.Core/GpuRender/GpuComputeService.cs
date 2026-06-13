@@ -11,6 +11,8 @@ namespace NOLoader.Core.GpuRender
 
         private readonly List<RegisteredGpuMod> _mods = new List<RegisteredGpuMod>();
 
+        internal bool HasRegisteredMods => _mods.Count > 0;
+
         public void Register(INOModGpuCompute mod, int modIdHash)
         {
             _mods.Add(new RegisteredGpuMod { Mod = mod, ModIdHash = modIdHash });

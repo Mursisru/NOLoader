@@ -136,7 +136,7 @@ Encyclopedia inject is automatic via core Cecil hook on `Encyclopedia::AfterLoad
 
 RDYTU mod DLL (`dotnet build -c RDYTU`): implement tick interfaces; omit `Update`/`LateUpdate` loops via `#if !NOLoader_RDYTU`. DEV build keeps `MonoBehaviour` paths only.
 
-**ModOptimizer (DEV4O1):** hot-path `MonoBehaviour.Update` is discouraged — analyzer logs `[ModOpt][WARN]` at load. Use `INOModTick*` instead. See [`MOD_OPTIMIZER.md`](MOD_OPTIMIZER.md).
+**ModOptimizer (DEV4O2):** hot-path `MonoBehaviour.Update` is discouraged — analyzer logs `[ModOpt][WARN]` at load. Use `INOModTick*` instead. Does not boost base-game FPS; remove `ModOptimizerVerify` from `mods/` for production. See [`MOD_OPTIMIZER.md`](MOD_OPTIMIZER.md).
 
 Pack: `dotnet build -c RDYTU` then `pack-mod-rdytu.ps1`. Configure `[Perf]` in `noloader_config.ini`: `NormalTickStride`, `SlowTickIntervalSec`, `WorldSnapshotStride`, `ModBudgetMs`.
 

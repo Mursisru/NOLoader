@@ -12,11 +12,11 @@ namespace NOLoader.Core.ModOptimizer
         public static GameObject FindRedirect(string name)
         {
             if (!RuntimeConfig.ModOptimizerEnabled || !RuntimeConfig.ModSceneLocatorEnabled)
-                return FindByHierarchy(name);
+                return ResolveNonModFind(name);
 
             Assembly caller = Assembly.GetCallingAssembly();
             if (!ModAssemblyTracker.IsModAssembly(caller))
-                return FindByHierarchy(name);
+                return ResolveNonModFind(name);
 
             if (ModSceneLocator.Instance.TryGet(name, out object cachedObj) && cachedObj is GameObject cached && cached != null)
                 return cached;
@@ -26,6 +26,14 @@ namespace NOLoader.Core.ModOptimizer
                 ModSceneLocator.Instance.Register(name, found);
 
             return found;
+        }
+
+        private static GameObject ResolveNonModFind(string name)
+        {
+            if (ModNativeGameObjectFind.IsAvailable)
+                return ModNativeGameObjectFind.Invoke(name)!;
+
+            return FindByHierarchy(name);
         }
 
         private static GameObject FindByHierarchy(string name)

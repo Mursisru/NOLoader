@@ -53,7 +53,7 @@ namespace NOLoader.Core
 #if !NOLoader_DEV
             Runtime.Balance.CoreBalancerBootstrap.Initialize();
             GpuRender.GpuRenderBootstrap.Initialize(GameRoot);
-            ModOptimizer.ModOptimizerBootstrap.Initialize();
+            ModOptimizer.ModOptimizerBootstrap.Initialize(GameRoot);
 #endif
 
             ModAssemblyCache.Build(LoaderRoot, GameRoot);
