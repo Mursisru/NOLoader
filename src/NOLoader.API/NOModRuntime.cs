@@ -23,6 +23,12 @@ namespace NOLoader.API
 
         public static INOModGpuRuntime Gpu { get; internal set; } = NOModGpuRuntimeStub.Instance;
 
+        public static INOModReflectionCache Reflection { get; internal set; } = NOModReflectionCacheStub.Instance;
+
+        public static INOModSceneLocator Scene { get; internal set; } = NOModSceneLocatorStub.Instance;
+
+        public static INOModCollisionRegistry Collision { get; internal set; } = NOModCollisionRegistryStub.Instance;
+
         internal static Func<INOModWorldReader>? ActivateWorldCallback { get; set; }
 
         public static INOModWorldReader GetWorld()

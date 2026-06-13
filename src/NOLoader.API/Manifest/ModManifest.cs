@@ -22,6 +22,10 @@ namespace NOLoader.API.Manifest
         public int IdHash;
         /// <summary>True when manifest uses idHash without plain id (RDYTU hash-only).</summary>
         public bool HashOnlyId;
+        /// <summary>Optional shader/material warmup entries (ModOptimizer).</summary>
+        public ModWarmupSpec? Warmup;
+        /// <summary>Optional reflection bake list (ModOptimizer).</summary>
+        public List<ReflectionBakeEntry> ReflectionBake = new List<ReflectionBakeEntry>();
     }
 
     public sealed class PatchDescriptor

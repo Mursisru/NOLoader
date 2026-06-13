@@ -53,6 +53,7 @@ namespace NOLoader.Core
 #if !NOLoader_DEV
             Runtime.Balance.CoreBalancerBootstrap.Initialize();
             GpuRender.GpuRenderBootstrap.Initialize(GameRoot);
+            ModOptimizer.ModOptimizerBootstrap.Initialize();
 #endif
 
             ModAssemblyCache.Build(LoaderRoot, GameRoot);
@@ -290,10 +291,17 @@ namespace NOLoader.Core
             if (unityPlan.Count == 0)
                 return;
 
-            if (IsAssemblyAlreadyPatched(GameRoot, "UnityEngine.CoreModule.dll", "NOLoader.Core.Gates.MissionGateHooks"))
+            if (IsAssemblyAlreadyPatched(GameRoot, "UnityEngine.CoreModule.dll", "SceneLoadPrefixSkip"))
             {
-                RingBufferLog.WriteAscii("[NOLoader] UnityEngine.CoreModule already patched (pre-apply)");
-                return;
+                bool findNeeded = Runtime.RuntimeConfig.ModOptimizerEnabled
+                    && Runtime.RuntimeConfig.ModSceneLocatorEnabled;
+                bool findPatched = !findNeeded
+                    || IsAssemblyAlreadyPatched(GameRoot, "UnityEngine.CoreModule.dll", "FindRedirect");
+                if (findPatched)
+                {
+                    RingBufferLog.WriteAscii("[NOLoader] UnityEngine.CoreModule already patched (pre-apply)");
+                    return;
+                }
             }
 
             try

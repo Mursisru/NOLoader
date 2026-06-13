@@ -53,6 +53,15 @@ namespace NOLoader.Core.Runtime
         public static bool GpuHudPassEnabled { get; private set; }
         public static bool GpuFxInstancingEnabled { get; private set; }
 
+        public static bool ModOptimizerEnabled { get; private set; }
+        public static bool ModTickAnalyzerEnabled { get; private set; } = true;
+        public static bool ModReflectionCacheEnabled { get; private set; } = true;
+        public static bool ModSceneLocatorEnabled { get; private set; } = true;
+        public static bool ModCollisionLayersEnabled { get; private set; }
+        public static bool ModShaderWarmupEnabled { get; private set; } = true;
+        public static int ModLayerProjectile { get; private set; } = 27;
+        public static double ModShaderWarmupBudgetMs { get; private set; } = 50.0;
+
 #if NOLoader_DEV
         /// <summary>UDP Sim-Connect telemetry (DEV.SDK only).</summary>
         public static int TelemetryCaptureStride { get; private set; } = 1;
@@ -219,6 +228,34 @@ namespace NOLoader.Core.Runtime
                     break;
                 case "gpu_fx_instancing":
                     GpuFxInstancingEnabled = ParseBool(value, GpuFxInstancingEnabled);
+                    break;
+                case "mod_optimizer":
+                    ModOptimizerEnabled = ParseBool(value, ModOptimizerEnabled);
+                    break;
+                case "mod_tick_analyzer":
+                    ModTickAnalyzerEnabled = ParseBool(value, ModTickAnalyzerEnabled);
+                    break;
+                case "mod_reflection_cache":
+                    ModReflectionCacheEnabled = ParseBool(value, ModReflectionCacheEnabled);
+                    break;
+                case "mod_scene_locator":
+                    ModSceneLocatorEnabled = ParseBool(value, ModSceneLocatorEnabled);
+                    break;
+                case "mod_collision_layers":
+                    ModCollisionLayersEnabled = ParseBool(value, ModCollisionLayersEnabled);
+                    break;
+                case "mod_shader_warmup":
+                    ModShaderWarmupEnabled = ParseBool(value, ModShaderWarmupEnabled);
+                    break;
+                case "mod_layer_projectile":
+                    if (int.TryParse(value, out int layer) && layer >= 0 && layer <= 31)
+                        ModLayerProjectile = layer;
+                    break;
+                case "mod_shader_warmup_budget_ms":
+                    if (double.TryParse(value, System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out double warmupBudget)
+                        && warmupBudget > 0)
+                        ModShaderWarmupBudgetMs = warmupBudget;
                     break;
             }
         }

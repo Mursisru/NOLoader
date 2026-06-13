@@ -46,5 +46,9 @@
       <HintPath>$(NuclearOptionRoot)\NuclearOption_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(NuclearOptionRoot)\NuclearOption_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 </Project>

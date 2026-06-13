@@ -40,12 +40,18 @@ namespace NOLoader.Core.Patching
         public static List<PatchEntry> CreateUnityCorePlan(string loaderRoot)
         {
             string coreDir = Path.Combine(loaderRoot, "core");
-            return new List<PatchEntry>
+            var plan = new List<PatchEntry>
             {
                 Entry(coreDir, "noloader.gatel4.scene", "NOLoader.Core.dll",
                     "UnityEngine.SceneManagement.SceneManager::LoadSceneAsync",
                     "NOLoader.Core.Gates.MissionGateHooks::SceneLoadPrefixSkip", "PrefixSkip")
             };
+
+#if !NOLoader_DEV
+            plan.AddRange(ModOptimizer.ModOptimizerPatches.CreateUnityCorePlan(coreDir));
+#endif
+
+            return plan;
         }
 
         public static List<PatchEntry> CreateUnityPhysicsPlan(string loaderRoot)

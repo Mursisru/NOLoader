@@ -12,6 +12,7 @@ using NOLoader.Core.Manifest;
 using NOLoader.Core.Patching;
 using UnityEngine;
 #if !NOLoader_DEV
+using NOLoader.Core.ModOptimizer;
 using NOLoader.Core.Runtime.Perf;
 #endif
 
@@ -121,6 +122,9 @@ namespace NOLoader.Core.Mods
             ModPatchScheduler.ApplyThroughStage(_gameRoot, manifests, LoadStage.Mission);
             TryLogModIlProbe();
             ActivateStage(LoadStage.Mission);
+#if !NOLoader_DEV
+            ModShaderWarmup.RunOnMissionReady();
+#endif
         }
 
         private static void TryLogModIlProbe()
@@ -200,6 +204,21 @@ namespace NOLoader.Core.Mods
 
                 mod.Assembly = Assembly.LoadFrom(asmPath);
                 Type? entryType = mod.Assembly.GetType(mod.Manifest.EntryType, throwOnError: true);
+
+#if !NOLoader_DEV
+                ModOptimizerBootstrap.OnModAssemblyLoaded(mod.Assembly, mod.Manifest.IdHash);
+                bool hasTickInterfaces = typeof(INOModTickFast).IsAssignableFrom(entryType!)
+                    || typeof(INOModTickNormal).IsAssignableFrom(entryType!)
+                    || typeof(INOModTickSlow).IsAssignableFrom(entryType!);
+                ModLoadAnalyzerResult analysis = ModLoadAnalyzer.Analyze(asmPath, hasTickInterfaces);
+                ModTickEnforcer.Apply(mod.Manifest, analysis);
+                if (ModOptimizerBootstrap.IsReflectionCacheActive)
+                {
+                    ModReflectionCache.Instance.BakeManifest(mod.Assembly, mod.Manifest.IdHash, mod.Manifest.ReflectionBake);
+                    ModReflectionCache.Instance.BakeAnalyzerHits(mod.Assembly, mod.Manifest.IdHash, analysis.ReflectionHits);
+                }
+#endif
+
                 mod.Instance = (INOMod?)Activator.CreateInstance(entryType!);
                 if (mod.Instance == null)
                     throw new InvalidOperationException("Entry type does not implement INOMod");
@@ -251,6 +270,8 @@ namespace NOLoader.Core.Mods
         {
             if (mod.Instance == null) return;
 #if !NOLoader_DEV
+            if (mod.Assembly != null)
+                ModOptimizerBootstrap.OnModAssemblyUnloaded(mod.Assembly);
             if (PerfEntries.TryGetValue(mod, out LoadedModEntry? perfEntry))
             {
                 NOModPerfBootstrap.OnModUnloaded(perfEntry);

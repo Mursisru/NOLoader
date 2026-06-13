@@ -149,5 +149,14 @@ namespace NOLoader.Core.Runtime.Perf
                 ModTickScheduler.SetDemoteLevel(hash, Math.Max(0, level));
             }
         }
+
+        internal void ApplyAnalyzerDemotion(int modIdHash, int level)
+        {
+            if (level <= 0)
+                return;
+
+            _demoteLevel[modIdHash] = level;
+            ModTickScheduler.SetDemoteLevel(modIdHash, level);
+        }
     }
 }

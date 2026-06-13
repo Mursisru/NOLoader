@@ -32,7 +32,7 @@ New-Item -ItemType Directory -Force -Path (Join-Path $DeployRoot "logs") | Out-N
 Copy-Item -Force (Join-Path $RepoRoot "deploy\NOLoader\mods\README.txt") (Join-Path $ModsRoot "README.txt")
 
 Get-ChildItem $ModsRoot -Directory -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -ne "GpuRenderVerify" } |
+    Where-Object { $_.Name -notin @('GpuRenderVerify', 'ModOptimizerVerify') } |
     Remove-Item -Recurse -Force
 
 $coreDlls = @(
@@ -85,7 +85,7 @@ $iniPath = Join-Path $GameRoot "noloader_config.ini"
 $preserve = @{}
 if (Test-Path $iniPath) {
     foreach ($line in Get-Content $iniPath) {
-        if ($line -match '^(gpu_render|gpu_hud_pass|gpu_fx_instancing|gfx_native_jobs|core_balancer|canvas_limiter)\s*=\s*1\s*$') {
+        if ($line -match '^(gpu_render|gpu_hud_pass|gpu_fx_instancing|gfx_native_jobs|core_balancer|canvas_limiter|mod_optimizer|mod_tick_analyzer|mod_reflection_cache|mod_scene_locator|mod_collision_layers|mod_shader_warmup)\s*=\s*1\s*$') {
             $k = ($line -split '=')[0].Trim()
             $preserve[$k] = '1'
         }

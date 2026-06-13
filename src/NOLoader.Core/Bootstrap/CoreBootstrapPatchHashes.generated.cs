@@ -17,8 +17,6 @@ namespace NOLoader.Core.Patching
                 case "noloader.physics": return "47A8A5BEE465F9DB";
                 case "noloader.gatel4": return "FC4B1C7759298AD7";
                 case "noloader.gatel4.scene": return "D5766C33F029604F";
-                case "noloader.physics.unity": return "24601248ED5DDC92";
-                case "noloader.physics.unity.single": return "AEFE7B390E08D5B2";
                 default: return null;
             }
         }

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>NOLoader.ModOptimizerVerify</RootNamespace>
+    <AssemblyName>NOLoader.ModOptimizerVerify</AssemblyName>
+    <Configurations>Debug;Release;RDYTU;DEV_SDK</Configurations>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\NOLoader.API\NOLoader.API.csproj" />
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(NuclearOptionRoot)\NuclearOption_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

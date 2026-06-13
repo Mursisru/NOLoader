@@ -246,6 +246,9 @@ namespace NOLoader.Patcher
             if (MethodAlreadyContainsInjectCall(targetMethod, injectMethodName))
                 return true;
 
+            if (string.Equals(entry.Descriptor.Method, "Redirect", StringComparison.OrdinalIgnoreCase))
+                EnsureRedirectBody(targetMethod);
+
             ILProcessor il = targetMethod.Body.GetILProcessor();
             var call = il.Create(OpCodes.Call, injectRef);
             int throttleEveryN = entry.Descriptor.ThrottleEveryN;
@@ -365,6 +368,14 @@ namespace NOLoader.Patcher
             return true;
         }
 
+        private static void EnsureRedirectBody(MethodDefinition method)
+        {
+            if (!method.HasBody)
+                method.Body = new Mono.Cecil.Cil.MethodBody(method);
+
+            method.ImplAttributes = Mono.Cecil.MethodImplAttributes.IL;
+        }
+
         private static void ApplyRedirectMethodBody(
             ILProcessor il,
             MethodDefinition targetMethod,
@@ -434,7 +445,10 @@ namespace NOLoader.Patcher
             PatchDescriptor descriptor,
             MethodDefinition? injectMethod)
         {
-            var candidates = targetType.Methods.Where(m => m.Name == methodName && m.HasBody).ToList();
+            bool allowExtern = string.Equals(descriptor.Method, "Redirect", StringComparison.OrdinalIgnoreCase);
+            var candidates = targetType.Methods
+                .Where(m => m.Name == methodName && (m.HasBody || allowExtern))
+                .ToList();
             if (candidates.Count == 0)
                 return null;
 

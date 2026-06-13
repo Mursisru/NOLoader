@@ -54,6 +54,8 @@ namespace NOLoader.Core.Manifest
             m.LoadStage = ParseStage(ReadString(json, "loadStage"));
             m.Dependencies = ReadStringArray(json, "dependencies");
             m.Patches = ReadPatches(json);
+            m.Warmup = ReadWarmup(json);
+            m.ReflectionBake = ReadReflectionBake(json);
 
             int idHash = ReadInt(json, "idHash");
             if (idHash != 0)
@@ -145,6 +147,85 @@ namespace NOLoader.Core.Manifest
                 if (!string.IsNullOrEmpty(trimmed))
                     list.Add(trimmed);
             }
+            return list;
+        }
+
+        private static ModWarmupSpec? ReadWarmup(string json)
+        {
+            int keyIdx = json.IndexOf("\"warmup\"", StringComparison.Ordinal);
+            if (keyIdx < 0)
+                return null;
+
+            int objStart = json.IndexOf('{', keyIdx);
+            if (objStart < 0)
+                return null;
+
+            int depth = 0;
+            int objEnd = -1;
+            for (int i = objStart; i < json.Length; i++)
+            {
+                if (json[i] == '{') depth++;
+                else if (json[i] == '}')
+                {
+                    depth--;
+                    if (depth == 0)
+                    {
+                        objEnd = i;
+                        break;
+                    }
+                }
+            }
+
+            if (objEnd < 0)
+                return null;
+
+            string obj = json.Substring(objStart, objEnd - objStart + 1);
+            return new ModWarmupSpec
+            {
+                Materials = ReadStringArray(obj, "materials"),
+                Shaders = ReadStringArray(obj, "shaders"),
+                Prefabs = ReadStringArray(obj, "prefabs")
+            };
+        }
+
+        private static List<ReflectionBakeEntry> ReadReflectionBake(string json)
+        {
+            var list = new List<ReflectionBakeEntry>();
+            int keyIdx = json.IndexOf("\"reflectionBake\"", StringComparison.Ordinal);
+            if (keyIdx < 0)
+                return list;
+
+            int arrStart = json.IndexOf('[', keyIdx);
+            if (arrStart < 0)
+                return list;
+
+            int depth = 0;
+            int objStart = -1;
+            for (int i = arrStart; i < json.Length; i++)
+            {
+                if (json[i] == '{')
+                {
+                    if (depth == 0) objStart = i;
+                    depth++;
+                }
+                else if (json[i] == '}')
+                {
+                    depth--;
+                    if (depth == 0 && objStart >= 0)
+                    {
+                        string obj = json.Substring(objStart, i - objStart + 1);
+                        list.Add(new ReflectionBakeEntry
+                        {
+                            Type = ReadString(obj, "type"),
+                            Method = ReadString(obj, "method")
+                        });
+                        objStart = -1;
+                    }
+                }
+                else if (json[i] == ']' && depth == 0)
+                    break;
+            }
+
             return list;
         }
 
