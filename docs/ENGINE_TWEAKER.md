@@ -14,7 +14,7 @@ Global Cecil patches in `NOLoader.Core` that optimize Nuclear Option gameplay IL
 | `hud_refresh_skip` | `1` | Skip HUD/MFD `Refresh()` when speed/alt unchanged |
 | `culling_optimizer` | `1` | Distance-based visual throttling via `displayDetail` |
 | `frame_cache` | `1` | Cache camera/aircraft position per frame (`INOModFrameCache`) |
-| `canvas_limiter` | `0` | Dedupe uGUI graphic rebuild requests (opt-in) |
+| `canvas_limiter` | `0` | Dedupe uGUI graphic rebuild requests (opt-in; also when `gpu_render=1` without `engine_tweaker`) |
 | `cull_distance_m` | `5000` | Force `displayDetail=0` beyond this distance |
 | `display_detail_min` | `1.0` | Threshold for skipping wheel/animator work |
 | `string_cache_max` | `2000` | Pre-warm table size for speed strings |

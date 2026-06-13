@@ -8,7 +8,7 @@ namespace NOLoader.Core
         public const string VersionChannel = "DEV";
         public const int CycleBuildNumber = 2;
         public const string ChangeLetters = "O";
-        public const int SubNumber = 9;
+        public const int SubNumber = 13;
 
         public static string BuildToken => $"{VersionChannel}{CycleBuildNumber}{ChangeLetters}{SubNumber}";
         public static string Display => $"{ReleaseBase} Build {BuildToken}";

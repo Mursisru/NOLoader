@@ -31,6 +31,7 @@ namespace NOLoader.Core.Patching
 
 #if !NOLoader_DEV
             plan.AddRange(EngineTweaker.EngineTweakerPatches.CreateGamePlan(coreDir));
+            plan.AddRange(GpuRender.GpuRenderPatches.CreateGamePlan(coreDir));
 #endif
 
             return plan;
@@ -70,7 +71,8 @@ namespace NOLoader.Core.Patching
             return new List<PatchEntry>();
 #else
             string coreDir = Path.Combine(loaderRoot, "core");
-            return EngineTweaker.EngineTweakerPatches.CreateUnityUiPlan(coreDir);
+            var plan = EngineTweaker.EngineTweakerPatches.CreateUnityUiPlan(coreDir);
+            return plan;
 #endif
         }
 

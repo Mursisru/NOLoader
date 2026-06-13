@@ -21,6 +21,8 @@ namespace NOLoader.API
 
         public static INOModComputeScheduler Scheduler { get; internal set; } = NOModComputeSchedulerStub.Instance;
 
+        public static INOModGpuRuntime Gpu { get; internal set; } = NOModGpuRuntimeStub.Instance;
+
         internal static Func<INOModWorldReader>? ActivateWorldCallback { get; set; }
 
         public static INOModWorldReader GetWorld()

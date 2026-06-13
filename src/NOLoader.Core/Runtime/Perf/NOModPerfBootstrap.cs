@@ -34,12 +34,15 @@ namespace NOLoader.Core.Runtime.Perf
         public static void OnModLoaded(LoadedModEntry entry)
         {
             ModTickScheduler.Register(entry);
+            if (entry.Mod.Instance is INOModGpuCompute gpu)
+                GpuRender.GpuComputeService.Instance.Register(gpu, entry.Mod.Manifest.IdHash);
             if (ModTickScheduler.HasTickMods)
                 ModRuntimeHost.EnsureInstalled();
         }
 
         public static void OnModUnloaded(LoadedModEntry entry)
         {
+            GpuRender.GpuComputeService.Instance.Unregister(entry.Mod.Manifest.IdHash);
             ModTickScheduler.Unregister(entry);
         }
     }

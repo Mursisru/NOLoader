@@ -48,7 +48,10 @@ namespace NOLoader.Core.EngineTweaker
 #if NOLoader_DEV
             return plan;
 #else
-            if (!RuntimeConfig.EngineTweakerEnabled || !RuntimeConfig.CanvasLimiterEnabled)
+            if (!RuntimeConfig.EngineTweakerEnabled && !RuntimeConfig.GpuRenderEnabled)
+                return plan;
+
+            if (!RuntimeConfig.CanvasLimiterEnabled)
                 return plan;
 
             plan.Add(Entry(coreDir, "noloader.tweaker.canvas", "UnityEngine.UI.CanvasUpdateRegistry::RegisterCanvasElementForGraphicRebuild",

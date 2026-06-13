@@ -31,7 +31,9 @@ New-Item -ItemType Directory -Force -Path (Join-Path $DeployRoot "logs") | Out-N
 
 Copy-Item -Force (Join-Path $RepoRoot "deploy\NOLoader\mods\README.txt") (Join-Path $ModsRoot "README.txt")
 
-Get-ChildItem $ModsRoot -Directory -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
+Get-ChildItem $ModsRoot -Directory -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -ne "GpuRenderVerify" } |
+    Remove-Item -Recurse -Force
 
 $coreDlls = @(
     "NOLoader.Core.dll",
@@ -67,7 +69,61 @@ foreach ($dll in $coreDlls) {
 $legacyTelemetry = Join-Path $CoreDeploy "NOLoader.Telemetry.dll"
 if (Test-Path $legacyTelemetry) { Remove-Item -Force $legacyTelemetry }
 
-Copy-Item -Force (Join-Path $RepoRoot "deploy\noloader_config.ini") (Join-Path $GameRoot "noloader_config.ini")
+function Restore-IniOverrides {
+    param([string]$Path, [hashtable]$Overrides)
+    if (-not (Test-Path $Path) -or $Overrides.Count -eq 0) { return }
+    $content = Get-Content $Path -Raw
+    foreach ($key in $Overrides.Keys) {
+        $value = $Overrides[$key]
+        if ($content -match "(?m)^$key\s*=") { $content = $content -replace "(?m)^$key\s*=.*", "$key=$value" }
+        else { $content = $content.TrimEnd() + "`r`n$key=$value`r`n" }
+    }
+    Set-Content -Path $Path -Value $content -NoNewline
+}
+
+$iniPath = Join-Path $GameRoot "noloader_config.ini"
+$preserve = @{}
+if (Test-Path $iniPath) {
+    foreach ($line in Get-Content $iniPath) {
+        if ($line -match '^(gpu_render|gpu_hud_pass|gpu_fx_instancing|gfx_native_jobs|core_balancer|canvas_limiter)\s*=\s*1\s*$') {
+            $k = ($line -split '=')[0].Trim()
+            $preserve[$k] = '1'
+        }
+    }
+}
+Copy-Item -Force (Join-Path $RepoRoot "deploy\noloader_config.ini") $iniPath
+Restore-IniOverrides -Path $iniPath -Overrides $preserve
+
+function Ensure-BootConfigGfxJobs {
+    param([string]$Root)
+    $bootPath = Join-Path $Root "NuclearOption_Data\boot.config"
+    $dataDir = Split-Path $bootPath -Parent
+    if (-not (Test-Path $dataDir)) { return }
+    $lines = @()
+    if (Test-Path $bootPath) { $lines = @(Get-Content $bootPath) }
+    $backup = "$bootPath.noloader.bak"
+    if ((Test-Path $bootPath) -and -not (Test-Path $backup)) { Copy-Item $bootPath $backup }
+    $keys = @('gfx-enable-gfx-jobs=1', 'gfx-enable-native-gfx-jobs=1')
+    $changed = $false
+    foreach ($k in $keys) {
+        $name = ($k -split '=')[0]
+        $found = $false
+        foreach ($line in $lines) { if ($line.Trim().StartsWith("$name=")) { $found = $true; break } }
+        if (-not $found) { $lines += $k; $changed = $true }
+    }
+    if ($changed) {
+        Set-Content -Path $bootPath -Value $lines
+        Write-Host "boot.config gfx-jobs merged (backup: .noloader.bak)"
+    }
+}
+
+$noloaderIni = Join-Path $GameRoot "noloader_config.ini"
+if (Test-Path $noloaderIni) {
+    $iniText = Get-Content $noloaderIni -Raw
+    if ($iniText -match '(?m)^gpu_render\s*=\s*1' -and $iniText -match '(?m)^gfx_native_jobs\s*=\s*1') {
+        Ensure-BootConfigGfxJobs -Root $GameRoot
+    }
+}
 
 $proxyCandidates = @(
     (Join-Path $RepoRoot "artifacts\proxy\winhttp.dll"),

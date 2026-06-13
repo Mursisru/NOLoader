@@ -78,6 +78,8 @@ namespace NOLoader.Core.EngineTweaker
                 + " cull=" + RuntimeConfig.CullingOptimizerEnabled
                 + " frame=" + RuntimeConfig.FrameCacheEnabled
                 + " canvas=" + RuntimeConfig.CanvasLimiterEnabled);
+
+            GpuRender.GpuRenderBootstrap.OnUnityReady();
 #endif
         }
 

@@ -52,6 +52,7 @@ namespace NOLoader.Core
             Directory.CreateDirectory(Path.Combine(LoaderRoot, "logs"));
 #if !NOLoader_DEV
             Runtime.Balance.CoreBalancerBootstrap.Initialize();
+            GpuRender.GpuRenderBootstrap.Initialize(GameRoot);
 #endif
 
             ModAssemblyCache.Build(LoaderRoot, GameRoot);

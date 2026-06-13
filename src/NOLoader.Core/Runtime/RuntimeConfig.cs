@@ -47,6 +47,12 @@ namespace NOLoader.Core.Runtime
         public static bool DoubleBufferEnabled { get; private set; } = true;
         public static double ModComputeBudgetMs { get; private set; } = 2.0;
 
+        public static bool GpuRenderEnabled { get; private set; }
+        public static bool GfxNativeJobsEnabled { get; private set; } = true;
+        public static bool GpuMetricsEnabled { get; private set; } = true;
+        public static bool GpuHudPassEnabled { get; private set; }
+        public static bool GpuFxInstancingEnabled { get; private set; }
+
 #if NOLoader_DEV
         /// <summary>UDP Sim-Connect telemetry (DEV.SDK only).</summary>
         public static int TelemetryCaptureStride { get; private set; } = 1;
@@ -198,6 +204,21 @@ namespace NOLoader.Core.Runtime
                             System.Globalization.CultureInfo.InvariantCulture, out double computeBudget)
                         && computeBudget > 0)
                         ModComputeBudgetMs = computeBudget;
+                    break;
+                case "gpu_render":
+                    GpuRenderEnabled = ParseBool(value, GpuRenderEnabled);
+                    break;
+                case "gfx_native_jobs":
+                    GfxNativeJobsEnabled = ParseBool(value, GfxNativeJobsEnabled);
+                    break;
+                case "gpu_metrics":
+                    GpuMetricsEnabled = ParseBool(value, GpuMetricsEnabled);
+                    break;
+                case "gpu_hud_pass":
+                    GpuHudPassEnabled = ParseBool(value, GpuHudPassEnabled);
+                    break;
+                case "gpu_fx_instancing":
+                    GpuFxInstancingEnabled = ParseBool(value, GpuFxInstancingEnabled);
                     break;
             }
         }
