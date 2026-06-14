@@ -33,6 +33,8 @@ namespace NOLoader.Core.ModOptimizer
             if (_initialized)
                 return;
 
+            _ = gameRoot;
+
             _initialized = true;
 
             if (!RuntimeConfig.ModOptimizerEnabled)
@@ -42,7 +44,7 @@ namespace NOLoader.Core.ModOptimizer
             }
 
             if (RuntimeConfig.ModSceneLocatorEnabled)
-                ModNativeGameObjectFind.Initialize(gameRoot);
+                ModNativeGameObjectFind.Initialize();
 
             NOModRuntime.Reflection = ModReflectionCache.Instance;
             NOModRuntime.Scene = ModSceneLocator.Instance;

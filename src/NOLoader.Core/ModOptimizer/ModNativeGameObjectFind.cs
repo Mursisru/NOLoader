@@ -1,35 +1,33 @@
 #if !NOLoader_DEV
 using System;
-using System.IO;
 using System.Reflection;
 using NOLoader.Core.Logging;
-using NOLoader.Patcher;
 using UnityEngine;
 
 namespace NOLoader.Core.ModOptimizer
 {
-    /// <summary>Native GameObject.Find via vanilla CoreModule backup (redirected Find cannot call itself).</summary>
+    /// <summary>Native GameObject.Find via Cecil-injected InternalCall stub in CoreModule.</summary>
     internal static class ModNativeGameObjectFind
     {
+        private const string StubTypeName = "UnityEngine.NOLoaderNativeFind";
+        private const string StubMethodName = "InvokeNative";
+
         private static Func<string, GameObject>? _nativeFind;
         private static bool _initialized;
 
         internal static bool IsAvailable => _nativeFind != null;
 
-        internal static void Initialize(string gameRoot)
+        internal static void Initialize()
         {
             if (_initialized)
                 return;
 
             _initialized = true;
-            if (string.IsNullOrEmpty(gameRoot))
-                return;
-
-            _nativeFind = TryCreateNativeFind(gameRoot);
+            _nativeFind = TryBindNativeFind();
             if (_nativeFind != null)
-                RingBufferLog.WriteAscii("[ModOpt] native Find bound (vanilla CoreModule)");
+                RingBufferLog.WriteAscii("[ModOpt] native Find bound (CoreModule stub)");
             else
-                RingBufferLog.WriteAscii("[ModOpt][WARN] native Find unavailable — non-mod callers use hierarchy fallback");
+                RingBufferLog.WriteAscii("[ModOpt][WARN] native Find stub missing — restore CoreModule from vanilla backup");
         }
 
         internal static GameObject? Invoke(string name)
@@ -41,28 +39,21 @@ namespace NOLoader.Core.ModOptimizer
             {
                 return _nativeFind(name);
             }
-            catch
+            catch (Exception ex)
             {
+                RingBufferLog.WriteAscii("[ModOpt][WARN] native Find failed: " + ex.GetType().Name);
                 return null;
             }
         }
 
-        private static Func<string, GameObject>? TryCreateNativeFind(string gameRoot)
+        private static Func<string, GameObject>? TryBindNativeFind()
         {
-            const string module = "UnityEngine.CoreModule.dll";
-            string path = ManagedModuleGuard.GetVanillaBackupPath(gameRoot, module);
-            if (!File.Exists(path))
-                path = ManagedModuleGuard.GetLivePath(gameRoot, module) + ManagedModuleGuard.LegacyBackupExtension;
-            if (!File.Exists(path))
-                return null;
-
             try
             {
-                Assembly asm = Assembly.LoadFrom(path);
-                Type? goType = asm.GetType("UnityEngine.GameObject");
-                MethodInfo? mi = goType?.GetMethod(
-                    "Find",
-                    BindingFlags.Public | BindingFlags.Static,
+                Type? stubType = typeof(GameObject).Assembly.GetType(StubTypeName, throwOnError: false);
+                MethodInfo? mi = stubType?.GetMethod(
+                    StubMethodName,
+                    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
                     null,
                     new[] { typeof(string) },
                     null);

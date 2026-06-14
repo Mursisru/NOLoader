@@ -16,7 +16,7 @@ namespace NOLoader.ModOptimizerVerify
             ModOptimizerVerifyState.OnLoadLogged = true;
             ModOptimizerVerifyState.TargetSpawnCount = ResolveSpawnCount(ctx.ModRoot);
             ModOptimizerVerifyLogger.Phase("OnLoad");
-            ModOptimizerVerifyLogger.Info("mod=" + ctx.ModId + " DEV4O2 field test (NOModOptimizer)");
+            ModOptimizerVerifyLogger.Info("mod=" + ctx.ModId + " DEV5O1 field test (NOModOptimizer)");
             ModOptimizerVerifyLogger.Pass("manifest", "tick interfaces only (no magic Update)");
             ModOptimizerVerifyLogger.Info("covers: reflectionBake warmup sceneLocator Find redirect collision");
             ModOptimizerVerifyLogger.Info("spawn_count=" + ModOptimizerVerifyState.TargetSpawnCount + " (lite=3, full=30 via mod.ini)");

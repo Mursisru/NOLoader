@@ -1,6 +1,7 @@
 #if !NOLoader_DEV
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using NOLoader.Core.Runtime;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,37 +10,74 @@ namespace NOLoader.Core.ModOptimizer
 {
     public static class ModOptimizerHooks
     {
-        public static GameObject FindRedirect(string name)
+        [ThreadStatic] private static string? _lastCallerName;
+        [ThreadStatic] private static bool _lastCallerIsMod;
+
+        public static GameObject? FindRedirect(string name)
         {
             if (!RuntimeConfig.ModOptimizerEnabled || !RuntimeConfig.ModSceneLocatorEnabled)
                 return ResolveNonModFind(name);
 
-            Assembly caller = Assembly.GetCallingAssembly();
-            if (!ModAssemblyTracker.IsModAssembly(caller))
+            string callerName = GetCallerAssemblyName();
+            if (string.IsNullOrEmpty(callerName) || IsKnownNonModAssemblyName(callerName))
                 return ResolveNonModFind(name);
+
+            if (ReferenceEquals(callerName, _lastCallerName))
+            {
+                if (!_lastCallerIsMod)
+                    return ResolveNonModFind(name);
+            }
+            else
+            {
+                _lastCallerName = callerName;
+                _lastCallerIsMod = ModAssemblyTracker.IsModAssemblyByName(callerName);
+                if (!_lastCallerIsMod)
+                    return ResolveNonModFind(name);
+            }
 
             if (ModSceneLocator.Instance.TryGet(name, out object cachedObj) && cachedObj is GameObject cached && cached != null)
                 return cached;
 
-            GameObject found = FindByHierarchy(name);
+            GameObject? found = FindByHierarchy(name);
             if (found != null)
                 ModSceneLocator.Instance.Register(name, found);
 
             return found;
         }
 
-        private static GameObject ResolveNonModFind(string name)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static string GetCallerAssemblyName()
+        {
+            Assembly caller = Assembly.GetCallingAssembly();
+            return caller.GetName().Name ?? string.Empty;
+        }
+
+        private static bool IsKnownNonModAssemblyName(string name)
+        {
+            if (ModAssemblyTracker.IsCoreAssemblyName(name))
+                return true;
+
+            if (name.StartsWith("UnityEngine.", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (name.StartsWith("Unity.", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return false;
+        }
+
+        private static GameObject? ResolveNonModFind(string name)
         {
             if (ModNativeGameObjectFind.IsAvailable)
-                return ModNativeGameObjectFind.Invoke(name)!;
+                return ModNativeGameObjectFind.Invoke(name);
 
             return FindByHierarchy(name);
         }
 
-        private static GameObject FindByHierarchy(string name)
+        private static GameObject? FindByHierarchy(string name)
         {
             if (string.IsNullOrEmpty(name))
-                return null!;
+                return null;
 
             int sceneCount = SceneManager.sceneCount;
             for (int s = 0; s < sceneCount; s++)
@@ -57,19 +95,31 @@ namespace NOLoader.Core.ModOptimizer
                 }
             }
 
-            return null!;
+            return null;
         }
 
         private static GameObject? FindInHierarchy(Transform root, string name)
         {
-            if (string.Equals(root.name, name, StringComparison.Ordinal))
-                return root.gameObject;
+            if (root == null)
+                return null;
 
-            for (int i = 0; i < root.childCount; i++)
+            try
             {
-                GameObject? childHit = FindInHierarchy(root.GetChild(i), name);
-                if (childHit != null)
-                    return childHit;
+                if (string.Equals(root.name, name, StringComparison.Ordinal))
+                    return root.gameObject;
+
+                int childCount = root.childCount;
+                for (int i = 0; i < childCount; i++)
+                {
+                    Transform child = root.GetChild(i);
+                    GameObject? childHit = FindInHierarchy(child, name);
+                    if (childHit != null)
+                        return childHit;
+                }
+            }
+            catch (MissingReferenceException)
+            {
+                return null;
             }
 
             return null;

@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 if (-not (Test-Path $RingLogPath)) { Write-Host "[FAIL] Ring log not found"; exit 1 }
 
 $lines = @(Get-Content $RingLogPath | Where-Object { $_ -match '\[ModOpt\]|\[ModOptVerify\]' })
-Write-Host "=== NOLoader ModOptimizer Verify (DEV4O2) ===" -ForegroundColor Cyan
+Write-Host "=== NOLoader ModOptimizer Verify (DEV5O1) ===" -ForegroundColor Cyan
 Write-Host "Lines: $($lines.Count)"
 $joined = $lines -join "`n"
 

@@ -6,9 +6,9 @@ namespace NOLoader.Core
 
         // Engine: always DEV. PR-R — only in Desktop\GITHUB local mirror after robocopy.
         public const string VersionChannel = "DEV";
-        public const int CycleBuildNumber = 4;
+        public const int CycleBuildNumber = 9;
         public const string ChangeLetters = "O";
-        public const int SubNumber = 2;
+        public const int SubNumber = 11;
 
         public static string BuildToken => $"{VersionChannel}{CycleBuildNumber}{ChangeLetters}{SubNumber}";
         public static string Display => $"{ReleaseBase} Build {BuildToken}";

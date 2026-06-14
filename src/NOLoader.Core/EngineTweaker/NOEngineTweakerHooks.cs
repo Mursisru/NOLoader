@@ -13,16 +13,26 @@ namespace NOLoader.Core.EngineTweaker
         public static bool MFDAppManagerUpdatePrefix(object __instance)
             => !HudRefreshSkipState.ShouldSkipManagerUpdate(__instance);
 
-        public static void CameraStateManagerUpdatePostfix(object __instance)
-        {
-            EngineFrameCacheImpl.Instance.PopulateFromCameraState(__instance);
-        }
+        // CameraStateManager — vanilla (TrackIR / cockpit); tweaker frame loop uses ModRuntimeHost LateUpdate.
 
         public static bool AnimateWheelsPrefixSkip(object __instance, float speed)
         {
             if (__instance == null)
                 return true;
             return !EngineCullingState.ShouldSkipVisualUpdate(__instance);
+        }
+
+        public static bool GroundVehicleUpdatePrefixSkip(object __instance)
+        {
+            if (__instance == null)
+                return true;
+
+            if (!EngineCullingState.ShouldSkipOffScreenGroundAudio(__instance))
+                return true;
+
+            EngineCullingState.RecordAudioSkip();
+            GroundVehicleVisualAccess.RunCheapClientUpdate(__instance);
+            return false;
         }
 
         public static void PilotDismountedFixedUpdatePrefix(object __instance)
@@ -66,16 +76,25 @@ namespace NOLoader.Core.EngineTweaker
             EngineStringCache.ResetStats();
             EngineFrameCacheImpl.Instance.ResetStats();
             EngineCullingState.ResetStats();
+            GroundVehicleRendererCull.ResetStats();
+            FpsAdaptiveDetailGovernor.Reset();
             CanvasRebuildLimiter.ResetStats();
             HudRefreshSkipState.Clear();
             CanvasRebuildLimiter.ClearFrame();
 
             NOModRuntime.FrameCache = EngineFrameCacheImpl.Instance;
             GameplayMechanicsGuard.PinLocalPlayerSimState();
+            Runtime.Perf.ModRuntimeHost.EnsureForEngineTweaker();
 
             RingBufferLog.WriteAscii("[NOLoader] NOEngineTweaker initialized string="
                 + RuntimeConfig.StringCacheEnabled
-                + " cull=" + RuntimeConfig.CullingOptimizerEnabled
+                + " cull_ground=" + RuntimeConfig.CullingGroundWheelsEnabled
+                + " cull_renderer=" + RuntimeConfig.CullingGroundRendererEnabled
+                + " cull_pilot=" + RuntimeConfig.CullingPilotAnimEnabled
+                + " cull_offscreen=" + RuntimeConfig.CullingOffscreenOnlyEnabled
+                + " cull_on_screen_max_m=" + RuntimeConfig.CullingOnScreenMaxM.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                + " fps_adaptive_detail=" + RuntimeConfig.FpsAdaptiveDetailEnabled
+                + " trackir_safe=" + RuntimeConfig.TrackIrSafeModeEnabled
                 + " frame=" + RuntimeConfig.FrameCacheEnabled
                 + " canvas=" + RuntimeConfig.CanvasLimiterEnabled);
 
@@ -88,6 +107,10 @@ namespace NOLoader.Core.EngineTweaker
 #if !NOLoader_DEV
             HudRefreshSkipState.Clear();
             CanvasRebuildLimiter.ClearFrame();
+            EngineTweakerGameAccess.InvalidateCameraCache();
+            GroundVehicleRendererCull.ClearCache();
+            FpsAdaptiveDetailGovernor.Reset();
+            TrackIrStabilityGuard.ResetState();
             GameplayMechanicsGuard.PinLocalPlayerSimState();
 #endif
         }
@@ -103,6 +126,12 @@ namespace NOLoader.Core.EngineTweaker
             RingBufferLog.WriteAscii("[EngineTweaker] string_cache hits=" + EngineStringCache.Hits
                 + " miss=" + EngineStringCache.Misses
                 + " cull_skip=" + EngineCullingState.SkippedAnim
+                + " ground_offscreen_skip=" + EngineCullingState.OffscreenSkipped
+                + " ground_audio_skip=" + EngineCullingState.AudioSkipped
+                + " ground_renderer_skip=" + GroundVehicleRendererCull.RendererSkipped
+                + " renderer_cull_eval=" + EngineCullingState.RendererCullCount
+                + " adaptive_detail=" + (FpsAdaptiveDetailGovernor.ThrottleActive ? "on" : "off")
+                + " hud_marker_skip=" + HudMarkerThrottleState.TotalSkipped
                 + " frame_reads=" + EngineFrameCacheImpl.Instance.Reads
                 + " canvas_block=" + CanvasRebuildLimiter.Blocked);
 #endif

@@ -31,6 +31,7 @@ namespace NOLoader.Core.Patching
 
 #if !NOLoader_DEV
             plan.AddRange(EngineTweaker.EngineTweakerPatches.CreateGamePlan(coreDir));
+            plan.AddRange(EngineTweaker.HudMarkerPatches.CreateGamePlan(coreDir));
             plan.AddRange(GpuRender.GpuRenderPatches.CreateGamePlan(coreDir));
 #endif
 

@@ -22,7 +22,8 @@ namespace NOLoader.Core.GpuRender
                 return;
             }
 
-            if (RuntimeConfig.GfxNativeJobsEnabled)
+            if (RuntimeConfig.GfxNativeJobsEnabled
+                && (RuntimeConfig.GpuHudPassEnabled || RuntimeConfig.GpuFxInstancingEnabled))
                 BootConfigHelper.Apply(gameRoot, true);
 
             NOModRuntime.Gpu = GpuComputeService.Instance;
@@ -38,10 +39,23 @@ namespace NOLoader.Core.GpuRender
             if (!RuntimeConfig.GpuRenderEnabled)
                 return;
 
+            bool needsUrpHook = RuntimeConfig.GpuHudPassEnabled || RuntimeConfig.GpuFxInstancingEnabled;
+            bool needsHost = needsUrpHook || RuntimeConfig.GpuMetricsEnabled;
+
+            if (!needsHost)
+            {
+                RingBufferLog.WriteAscii("[GpuRender] idle (gpu_render=1 without hud/fx/metrics host)");
+                return;
+            }
+
             GpuRenderHost.EnsureInstalled();
-            GpuHudPass.Initialize();
-            if (RuntimeConfig.GpuFxInstancingEnabled)
-                FxInstancingRegistry.Initialize();
+
+            if (needsUrpHook)
+            {
+                GpuHudPass.Initialize();
+                if (RuntimeConfig.GpuFxInstancingEnabled)
+                    FxInstancingRegistry.Initialize();
+            }
         }
     }
 }

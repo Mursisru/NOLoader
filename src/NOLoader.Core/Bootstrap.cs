@@ -62,6 +62,7 @@ namespace NOLoader.Core
 
             RingBufferLog.WriteAscii("[NOLoader] Bootstrap.Initialize");
             RingBufferLog.WriteAscii($"[NOLoader] {AppVersion.Display}");
+            RingBufferLog.WriteAscii("[NOLoader] perf profile=" + BuildPerfProfileLabel());
 
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
@@ -107,6 +108,9 @@ namespace NOLoader.Core
 
             ModPatchAssemblyPreloader.EnsureLoaded(manifests, LoaderRoot);
             EngineTweaker.NOEngineTweakerBootstrap.Initialize();
+#if !NOLoader_DEV
+            Runtime.Perf.ModRuntimeHost.EnsureForEngineTweaker();
+#endif
             RingBufferLog.WriteAscii("[NOLoader] MainMenu hook fired (cache=" + ModAssemblyCache.EntryCount + ")");
 
             try
@@ -295,11 +299,23 @@ namespace NOLoader.Core
             {
                 bool findNeeded = Runtime.RuntimeConfig.ModOptimizerEnabled
                     && Runtime.RuntimeConfig.ModSceneLocatorEnabled;
-                bool findPatched = !findNeeded
-                    || IsAssemblyAlreadyPatched(GameRoot, "UnityEngine.CoreModule.dll", "FindRedirect");
-                if (findPatched)
+                bool findOnDisk = IsAssemblyAlreadyPatched(GameRoot, "UnityEngine.CoreModule.dll", "FindRedirect");
+                if (findNeeded == findOnDisk)
                 {
                     RingBufferLog.WriteAscii("[NOLoader] UnityEngine.CoreModule already patched (pre-apply)");
+                    return;
+                }
+
+                try
+                {
+                    if (AssemblyPatcher.RestoreManagedModuleFromBackup(GameRoot, "UnityEngine.CoreModule.dll"))
+                        RingBufferLog.WriteAscii("[NOLoader] UnityEngine.CoreModule rebased (Find redirect state mismatch)");
+                    else
+                        RingBufferLog.WriteAscii("[NOLoader] UnityEngine.CoreModule Find mismatch — vanilla restore unavailable");
+                }
+                catch (IOException ex)
+                {
+                    RingBufferLog.WriteAscii("[NOLoader] UnityEngine.CoreModule restore locked: " + ex.Message);
                     return;
                 }
             }
@@ -369,6 +385,28 @@ namespace NOLoader.Core
 
             return -1;
         }
+
+#if !NOLoader_DEV
+        private static string BuildPerfProfileLabel()
+        {
+            bool maxOpt = Runtime.RuntimeConfig.HudMarkerThrottleEnabled
+                || Runtime.RuntimeConfig.CullingGroundWheelsEnabled
+                || Runtime.RuntimeConfig.CullingGroundRendererEnabled
+                || Runtime.RuntimeConfig.FpsAdaptiveDetailEnabled
+                || Runtime.RuntimeConfig.GpuHudPassEnabled;
+            if (maxOpt && Runtime.RuntimeConfig.EngineTweakerEnabled)
+                return "maxopt";
+
+            bool fieldTest = Runtime.RuntimeConfig.ModOptimizerEnabled
+                || Runtime.RuntimeConfig.GpuRenderEnabled
+                || Runtime.RuntimeConfig.ModCollisionLayersEnabled
+                || Runtime.RuntimeConfig.RingLogEnabled;
+            if (fieldTest)
+                return "fieldtest";
+
+            return "minimal";
+        }
+#endif
 
         internal static void StartLoaderMainThread()
         {

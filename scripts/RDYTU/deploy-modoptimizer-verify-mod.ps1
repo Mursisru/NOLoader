@@ -2,6 +2,7 @@ param(
     [string]$GameRoot = "C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option",
     [string]$Configuration = "RDYTU",
     [switch]$KeepOtherMods,
+    [switch]$EnableModOptimizer,
     [switch]$EnableCollisionLayers,
     [switch]$FullProbe
 )
@@ -49,9 +50,9 @@ if ($FullProbe) {
 & (Join-Path $RepoRoot "scripts\pack-mod-rdytu.ps1") -ModFolder $modRoot
 
 $noloaderIni = Join-Path $GameRoot "noloader_config.ini"
-if (Test-Path $noloaderIni) {
+if ($EnableModOptimizer -and (Test-Path $noloaderIni)) {
     $content = Get-Content $noloaderIni -Raw
-    foreach ($pair in @('mod_optimizer=1', 'mod_tick_analyzer=1', 'mod_reflection_cache=1', 'mod_scene_locator=1', 'mod_shader_warmup=1')) {
+    foreach ($pair in @('mod_optimizer=1', 'mod_tick_analyzer=1', 'mod_reflection_cache=1', 'mod_scene_locator=1', 'mod_shader_warmup=1', 'ring_log=1')) {
         $key = ($pair -split '=')[0]
         if ($content -match "(?m)^$key\s*=") { $content = $content -replace "(?m)^$key\s*=.*", $pair }
         else { $content = $content.TrimEnd() + "`r`n$pair`r`n" }
@@ -63,6 +64,9 @@ if (Test-Path $noloaderIni) {
         else { $content = $content.TrimEnd() + "`r`n$pair`r`n" }
     }
     Set-Content -Path $noloaderIni -Value $content -NoNewline
+    Write-Host "INI updated (-EnableModOptimizer): mod_optimizer=1 ring_log=1"
+} elseif (-not $EnableModOptimizer) {
+    Write-Host "INI unchanged (pass -EnableModOptimizer to set mod_optimizer=1)"
 }
 
-Write-Host "ModOptimizer verify mod deployed to $modRoot (DEV4O2 lite=$([int](-not $FullProbe)))"
+Write-Host "ModOptimizer verify mod deployed to $modRoot (lite=$([int](-not $FullProbe)))"

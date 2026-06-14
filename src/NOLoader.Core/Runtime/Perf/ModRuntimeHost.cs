@@ -1,3 +1,6 @@
+using System.Collections;
+using NOLoader.Core.EngineTweaker;
+using NOLoader.Core.Runtime;
 using UnityEngine;
 
 namespace NOLoader.Core.Runtime.Perf
@@ -14,6 +17,14 @@ namespace NOLoader.Core.Runtime.Perf
             UnityMainThread.Post(CreateHost);
         }
 
+        internal static void EnsureForEngineTweaker()
+        {
+            if (!RuntimeConfig.EngineTweakerEnabled)
+                return;
+
+            EnsureInstalled();
+        }
+
         private static void CreateHost()
         {
             if (_host != null)
@@ -25,10 +36,45 @@ namespace NOLoader.Core.Runtime.Perf
         }
     }
 
+    /// <summary>Runs after all gameplay LateUpdates (incl. CameraStateManager order 2 + TrackIR).</summary>
+    [DefaultExecutionOrder(32000)]
     internal sealed class ModRuntimeHostBehaviour : MonoBehaviour
     {
+        private static readonly WaitForEndOfFrame EndOfFrameWait = new WaitForEndOfFrame();
+        private Coroutine? _tweakerCoroutine;
+
+        private void Start()
+        {
+#if !NOLoader_DEV
+            if (RuntimeConfig.EngineTweakerEnabled)
+                _tweakerCoroutine = StartCoroutine(TweakerEndOfFrameLoop());
+#endif
+        }
+
+        private void OnDestroy()
+        {
+            if (_tweakerCoroutine != null)
+                StopCoroutine(_tweakerCoroutine);
+        }
+
+        private IEnumerator TweakerEndOfFrameLoop()
+        {
+            while (enabled)
+            {
+                yield return EndOfFrameWait;
+                EngineTweakerFrameLoop.RunEndOfFrame();
+            }
+        }
+
         private void Update()
         {
+#if !NOLoader_DEV
+            bool protectCamera = TrackIrStabilityGuard.ShouldProtectVanillaCameraFrame();
+
+            if (RuntimeConfig.EngineTweakerEnabled && !protectCamera)
+                GameplayMechanicsGuard.PinLocalPlayerSimState();
+#endif
+
             if (!ModTickScheduler.HasTickMods && !WorldSnapshotService.Instance.IsActive)
                 return;
 

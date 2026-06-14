@@ -3,7 +3,8 @@
     [string]$Configuration = "DEV_SDK",
     [string]$GameRoot = "C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option",
     [switch]$SkipHashVerify,
-    [switch]$IncludePlayerMods
+    [switch]$IncludePlayerMods,
+    [switch]$FieldTest
 )
 
 $ErrorActionPreference = "Stop"

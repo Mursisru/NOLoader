@@ -24,6 +24,13 @@ namespace NOLoader.Core.GpuRender
                 return;
 
             _initialized = true;
+
+            if (!RuntimeConfig.GpuHudPassEnabled && !RuntimeConfig.GpuFxInstancingEnabled)
+            {
+                RingBufferLog.WriteAscii("[GpuRender] GpuHudPass skipped (no hud/fx sub-flags)");
+                return;
+            }
+
             if (RuntimeConfig.GpuHudPassEnabled)
             {
                 _quad = CreateQuad();

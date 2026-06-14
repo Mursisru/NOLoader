@@ -27,10 +27,8 @@ namespace NOLoader.Core.GpuRender
 
     internal static class GpuHudPassState
     {
-        internal static bool ShouldSkipCpuMarkerUpdate()
-        {
-            return RuntimeConfig.GpuHudPassEnabled && GpuHudCapture.LastMarkerCount > 0;
-        }
+        /// <summary>GPU instanced draw does not replicate marker sprites yet — never skip CPU path.</summary>
+        internal static bool ShouldSkipCpuMarkerUpdate() => false;
     }
 }
 #endif

@@ -26,9 +26,20 @@ namespace NOLoader.Core.EngineTweaker
             if (!RuntimeConfig.EngineTweakerEnabled)
                 return;
 
-            if (!EngineTweakerGameAccess.TryGetLocalPlayerUnit(out object? unit) || unit == null)
-                return;
+            EngineTweakerGameAccess.EnsureInitialized();
 
+            if (EngineTweakerGameAccess.TryGetLocalPlayerUnit(out object? unit) && unit != null)
+                PinDisplayDetailIfNeeded(unit);
+
+            if (EngineTweakerGameAccess.TryGetFollowingUnit(out object? following) && following != null
+                && EngineTweakerGameAccess.IsLocalPlayerUnit(following))
+            {
+                PinDisplayDetailIfNeeded(following);
+            }
+        }
+
+        private static void PinDisplayDetailIfNeeded(object unit)
+        {
             float detail = EngineTweakerGameAccess.ReadDisplayDetail(unit);
             if (detail >= 1f)
                 return;

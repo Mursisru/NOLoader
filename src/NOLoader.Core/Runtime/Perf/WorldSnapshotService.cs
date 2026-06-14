@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using NOLoader.API;
 using NOLoader.API.World;
+using NOLoader.Core.EngineTweaker;
 using NOLoader.Core.Interop;
 using NOLoader.Core.Logging;
 using NOLoader.Core.Runtime;
@@ -22,6 +23,8 @@ namespace NOLoader.Core.Runtime.Perf
         private bool _active;
         private int _stride;
         private int _frameCounter;
+        private int _lastSkippedFar;
+        private int _lastWritten;
         private Type? _unitType;
         private Type? _aircraftType;
         private FieldInfo? _allUnitsField;
@@ -99,6 +102,12 @@ namespace NOLoader.Core.Runtime.Perf
             }
 
             int written = 0;
+            int skippedFar = 0;
+            EngineTweakerGameAccess.EnsureInitialized();
+            EngineTweakerGameAccess.TryReadMainCameraPosition(out Vector3 camPos);
+            float cullDist = RuntimeConfig.CullDistanceM;
+            float cullDistSq = cullDist * cullDist;
+
             for (int i = 0; i < list.Count; i++)
             {
                 object? unit = list[i];
@@ -108,11 +117,34 @@ namespace NOLoader.Core.Runtime.Perf
                 if (!TryBuildUnit(unit, out NOWorldUnit snapshot))
                     continue;
 
+                if (!snapshot.IsLocal)
+                {
+                    float dx = snapshot.Position.X - camPos.x;
+                    float dy = snapshot.Position.Y - camPos.y;
+                    float dz = snapshot.Position.Z - camPos.z;
+                    if (dx * dx + dy * dy + dz * dz > cullDistSq)
+                    {
+                        skippedFar++;
+                        continue;
+                    }
+                }
+
                 _units[written++] = snapshot;
             }
 
             _count = written;
+            _lastSkippedFar = skippedFar;
+            _lastWritten = written;
             _frameId++;
+
+            if (_frameId % 120 == 0 && list.Count > 0)
+            {
+                RingBufferLog.WriteAscii("[WorldSnapshot] units=" + _lastWritten
+                    + " skipped_far=" + _lastSkippedFar
+                    + " stride=" + _stride
+                    + " total=" + list.Count);
+            }
+
             PublishStableCopy();
         }
 
@@ -216,7 +248,7 @@ namespace NOLoader.Core.Runtime.Perf
             return true;
         }
 
-        private static int ReadInstanceId(object unit)
+        private static int ReadInstanceId(object? unit)
         {
             if (unit is UnityEngine.Object uo)
                 return uo.GetInstanceID();

@@ -6,7 +6,7 @@ Surgical optimizations for **mod DLLs only** — does not change VSync, target F
 
 ## Version
 
-`0.1.0 Build DEV4O2` (cycle **4**, letter **O**)
+`0.1.0 Build DEV7O1` (cycle **7**, letter **O**)
 
 Phase 1 + Phase 2 (analyzer, reflection cache, shader warmup, Find redirect, scene locator, collision registry).
 
@@ -30,11 +30,21 @@ Phase 1 + Phase 2 (analyzer, reflection cache, shader warmup, Find redirect, sce
 | `ring_log` | `0` | `1` (lock per line) |
 | `mod_optimizer` | `0` unless mods need it | `1` with verify mod |
 | `gpu_render` | `0` or full stack (`gpu_hud_pass=1`, …) | metrics only OK |
-| Verify mod | **remove** from `NOLoader/mods/` | `deploy-modoptimizer-verify-mod.ps1` (lite, 3 proxies) |
+| Verify mod | **never in production `mods/`** | `deploy-modoptimizer-verify-mod.ps1 -EnableModOptimizer` |
+
+**Production flight checklist**
+
+1. Run `deploy-noloader.ps1` (clears all verify mods from `mods/`).
+2. Confirm `mod_optimizer=0`, `gpu_render=0`, `frame_cache=0` in live INI.
+3. No `*Verify` folders under `NOLoader/mods/`.
+4. Ring log: `perf profile=minimal`.
+5. Field test only: `-FieldTest` deploy + explicit verify script with `-EnableModOptimizer`.
+
+**Find redirect:** when `mod_optimizer=0` or `mod_scene_locator=0`, PatchTool restores vanilla `GameObject.Find` (no managed redirect on disk).
 
 **EngineTweaker RDYTU:** only `string_cache` + `frame_cache` postfix are patched. `hud_refresh_skip` / `culling_optimizer` are **not** in the RDYTU Cecil plan (known throttle/gameplay regressions).
 
-**NOGpuRender:** with `gpu_render=1` but `gpu_hud_pass=0` and no `INOModGpuCompute` mods, DEV4O2 skips per-camera `CommandBuffer` work (no idle GPU dispatch overhead).
+**NOGpuRender:** with `gpu_render=1` but `gpu_hud_pass=0` and no `INOModGpuCompute` mods, DEV5O1 skips per-camera `CommandBuffer` work (no idle GPU dispatch overhead).
 
 ## 1. Update culling (API-first)
 
@@ -83,7 +93,7 @@ Cecil **Redirect** on `UnityEngine.GameObject::Find(string)` in `UnityEngine.Cor
 
 `ModOptimizerHooks.FindRedirect`:
 
-- **Game/core callers:** native `Find` via vanilla CoreModule backup (`ModNativeGameObjectFind`) — DEV4O2
+- **Game/core callers:** native `Find` via vanilla CoreModule backup (`ModNativeGameObjectFind`) — DEV5O1
 - **Mod callers:** `ModSceneLocator.TryGet` → hierarchy fallback → cache hit
 
 Mods register spawned objects:

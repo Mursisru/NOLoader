@@ -135,10 +135,10 @@ namespace NOLoader.Patcher
             try
             {
                 using var ms = new MemoryStream(assemblyBytes);
-                var resolver = new DefaultAssemblyResolver();
+                using var resolver = new DefaultAssemblyResolver();
                 resolver.AddSearchDirectory(Path.Combine(gameRoot, "NuclearOption_Data", "Managed"));
                 var readerParams = new ReaderParameters { AssemblyResolver = resolver };
-                var asm = AssemblyDefinition.ReadAssembly(ms, readerParams);
+                using var asm = AssemblyDefinition.ReadAssembly(ms, readerParams);
 
                 foreach (PatchEntry entry in plan)
                 {
@@ -243,6 +243,15 @@ namespace NOLoader.Patcher
             }
 
             var injectRef = gameAsm.MainModule.ImportReference(injectMethod);
+
+            if (string.Equals(entry.Descriptor.Method, "Redirect", StringComparison.OrdinalIgnoreCase)
+                && NativeFindStubInjector.IsGameObjectFindTarget(typeName, methodName)
+                && !NativeFindStubInjector.TryEnsureStub(gameAsm.MainModule, targetMethod, gameRoot))
+            {
+                errors.Add($"Failed to inject native Find stub for {typeName}::{methodName}");
+                return false;
+            }
+
             if (MethodAlreadyContainsInjectCall(targetMethod, injectMethodName))
                 return true;
 

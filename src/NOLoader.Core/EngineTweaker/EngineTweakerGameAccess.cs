@@ -15,6 +15,7 @@ namespace NOLoader.Core.EngineTweaker
         private static FieldInfo? _followingUnitField;
         private static FieldInfo? _mainCameraField;
         private static FieldInfo? _allUnitsField;
+        private static FieldInfo? _maxRadiusField;
         private static MethodInfo? _isLocalAircraftUnit;
         private static MethodInfo? _getLocalAircraft;
         private static PropertyInfo? _transformProperty;
@@ -58,6 +59,7 @@ namespace NOLoader.Core.EngineTweaker
 
             Type? unitRegistry = GameTypeCache.Resolve("UnitRegistry");
             _allUnitsField = unitRegistry?.GetField("allUnits", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            _maxRadiusField = unitType?.GetField("maxRadius", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
             Type? component = typeof(Component);
             _transformProperty = component.GetProperty("transform", BindingFlags.Instance | BindingFlags.Public);
@@ -66,14 +68,26 @@ namespace NOLoader.Core.EngineTweaker
             _initialized = true;
         }
 
+        private static int _metricCacheFrame = int.MinValue;
+        private static bool _metricCacheValue = true;
+
         internal static bool IsMetricUnitSystem()
         {
+            int frame = Time.frameCount;
+            if (frame == _metricCacheFrame)
+                return _metricCacheValue;
+
+            _metricCacheFrame = frame;
             EnsureInitialized();
             if (_unitSystemField == null)
-                return true;
+            {
+                _metricCacheValue = true;
+                return _metricCacheValue;
+            }
 
             object? value = _unitSystemField.GetValue(null);
-            return value == null || Convert.ToInt32(value) == 0;
+            _metricCacheValue = value == null || Convert.ToInt32(value) == 0;
+            return _metricCacheValue;
         }
 
         internal static float ReadDisplayDetail(object unit)
@@ -117,6 +131,18 @@ namespace NOLoader.Core.EngineTweaker
 
             object? result = _isLocalAircraftUnit.Invoke(null, new[] { unit });
             return result is bool isLocal && isLocal;
+        }
+
+        internal static bool TryGetFollowingUnit(out object? unit)
+        {
+            unit = null;
+            EnsureInitialized();
+            object? csm = ResolveCameraStateManager();
+            if (csm == null || _followingUnitField == null)
+                return false;
+
+            unit = _followingUnitField.GetValue(csm);
+            return unit != null;
         }
 
         internal static bool IsFollowingUnit(object unit)
@@ -171,6 +197,8 @@ namespace NOLoader.Core.EngineTweaker
             return false;
         }
 
+        internal static object? TryGetCameraStateManager() => ResolveCameraStateManager();
+
         internal static bool TryReadCameraState(object csm, out int detailUnitIndex, out object? followingUnit, out Camera? mainCamera)
         {
             detailUnitIndex = 0;
@@ -201,6 +229,19 @@ namespace NOLoader.Core.EngineTweaker
             return false;
         }
 
+        internal static bool TryGetAllUnitsList(out System.Collections.IList? units)
+        {
+            units = null;
+            EnsureInitialized();
+            if (_allUnitsField?.GetValue(null) is System.Collections.IList list)
+            {
+                units = list;
+                return true;
+            }
+
+            return false;
+        }
+
         internal static void SetAnimatorEnabled(object instance, bool enabled)
         {
             EnsureInitialized();
@@ -220,5 +261,126 @@ namespace NOLoader.Core.EngineTweaker
             aircraft = field?.GetValue(pilot);
             return aircraft != null;
         }
+
+        internal static bool TryReadMainCameraPosition(out Vector3 position)
+        {
+            position = default;
+            if (!TryGetMainCameraFrame(out MainCameraFrameState frame))
+                return false;
+
+            position = frame.Position;
+            return true;
+        }
+
+        internal static bool TryReadDistanceToMainCamera(object unit, out float distance)
+        {
+            distance = 0f;
+            if (unit == null)
+                return false;
+
+            if (!TryReadTransformPosition(unit, out Vector3 unitPos))
+                return false;
+
+            if (!TryGetMainCameraFrame(out MainCameraFrameState frame))
+                return false;
+
+            distance = Vector3.Distance(frame.Position, unitPos);
+            return true;
+        }
+
+        /// <summary>True when unit bounds intersect main camera frustum and are in front of camera.</summary>
+        internal static bool IsVisibleToMainCamera(object unit)
+        {
+            if (unit == null)
+                return false;
+
+            if (!TryReadTransformPosition(unit, out Vector3 unitPos))
+                return false;
+
+            if (!TryGetMainCameraFrame(out MainCameraFrameState frame))
+                return false;
+
+            Vector3 toUnit = unitPos - frame.Position;
+            if (Vector3.Dot(frame.Forward, toUnit) <= 0f)
+                return false;
+
+            float radius = ReadMaxRadius(unit);
+            if (radius <= 0f)
+                radius = 4f;
+
+            var bounds = new Bounds(unitPos, Vector3.one * (radius * 2f));
+            return GeometryUtility.TestPlanesAABB(frame.FrustumPlanes, bounds);
+        }
+
+        private static float ReadMaxRadius(object unit)
+        {
+            EnsureInitialized();
+            if (_maxRadiusField == null)
+                return 4f;
+
+            object? value = _maxRadiusField.GetValue(unit);
+            return value == null ? 4f : Convert.ToSingle(value);
+        }
+
+        private struct MainCameraFrameState
+        {
+            internal Vector3 Position;
+            internal Vector3 Forward;
+            internal Plane[] FrustumPlanes;
+        }
+
+        private static int _cameraFrameId = int.MinValue;
+        private static bool _cameraFrameValid;
+        private static Vector3 _cameraPosition;
+        private static Vector3 _cameraForward;
+        private static Plane[] _frustumPlanes = Array.Empty<Plane>();
+        private static object? _cachedCameraStateManager;
+
+        private static bool TryGetMainCameraFrame(out MainCameraFrameState frame)
+        {
+            int currentFrame = Time.frameCount;
+            if (_cameraFrameId != currentFrame)
+                RefreshMainCameraFrame(currentFrame);
+
+            frame = new MainCameraFrameState
+            {
+                Position = _cameraPosition,
+                Forward = _cameraForward,
+                FrustumPlanes = _frustumPlanes
+            };
+            return _cameraFrameValid;
+        }
+
+        private static void RefreshMainCameraFrame(int frameId)
+        {
+            _cameraFrameId = frameId;
+            _cameraFrameValid = false;
+            _frustumPlanes = Array.Empty<Plane>();
+
+            EnsureInitialized();
+            if (_cachedCameraStateManager == null)
+                _cachedCameraStateManager = ResolveCameraStateManager();
+
+            object? csm = _cachedCameraStateManager;
+            if (csm == null)
+                return;
+
+            if (!TryReadCameraState(csm, out _, out _, out Camera? camera) || camera == null)
+                return;
+
+            Transform camTransform = camera.transform;
+            _cameraPosition = camTransform.position;
+            _cameraForward = camTransform.forward;
+            _frustumPlanes = GeometryUtility.CalculateFrustumPlanes(camera);
+            _cameraFrameValid = _frustumPlanes.Length > 0;
+        }
+
+        internal static void InvalidateCameraCache()
+        {
+            _cameraFrameId = int.MinValue;
+            _cameraFrameValid = false;
+            _cachedCameraStateManager = null;
+        }
     }
 }
+

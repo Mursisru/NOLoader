@@ -4,7 +4,7 @@ using NOLoader.API;
 
 namespace NOLoader.ModOptimizerVerify
 {
-    /// <summary>RDYTU field-test mod for DEV4O2 (NOModOptimizer).</summary>
+    /// <summary>RDYTU field-test mod for DEV5O1 (NOModOptimizer).</summary>
     public sealed class ModOptimizerVerifyMod : INOMod, INOModTickSlow
     {
         public static void ProbePing()

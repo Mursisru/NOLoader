@@ -1,6 +1,8 @@
 param(
     [string]$GameRoot = "C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option",
-    [switch]$IncludePlayerMods
+    [switch]$IncludePlayerMods,
+    [switch]$FieldTest,
+    [switch]$Minimal
 )
 
 $ErrorActionPreference = "Stop"
@@ -31,8 +33,8 @@ New-Item -ItemType Directory -Force -Path (Join-Path $DeployRoot "logs") | Out-N
 
 Copy-Item -Force (Join-Path $RepoRoot "deploy\NOLoader\mods\README.txt") (Join-Path $ModsRoot "README.txt")
 
+# Production deploy clears all mod folders (verify + player). -IncludePlayerMods re-stages player mods below.
 Get-ChildItem $ModsRoot -Directory -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -notin @('GpuRenderVerify', 'ModOptimizerVerify') } |
     Remove-Item -Recurse -Force
 
 $coreDlls = @(
@@ -69,6 +71,14 @@ foreach ($dll in $coreDlls) {
 $legacyTelemetry = Join-Path $CoreDeploy "NOLoader.Telemetry.dll"
 if (Test-Path $legacyTelemetry) { Remove-Item -Force $legacyTelemetry }
 
+function Set-IniKey {
+    param([string]$Path, [string]$Key, [string]$Value)
+    $content = Get-Content $Path -Raw
+    if ($content -match "(?m)^$Key\s*=") { $content = $content -replace "(?m)^$Key\s*=.*", "$Key=$Value" }
+    else { $content = $content.TrimEnd() + "`r`n$Key=$Value`r`n" }
+    Set-Content -Path $Path -Value $content -NoNewline
+}
+
 function Restore-IniOverrides {
     param([string]$Path, [hashtable]$Overrides)
     if (-not (Test-Path $Path) -or $Overrides.Count -eq 0) { return }
@@ -85,14 +95,36 @@ $iniPath = Join-Path $GameRoot "noloader_config.ini"
 $preserve = @{}
 if (Test-Path $iniPath) {
     foreach ($line in Get-Content $iniPath) {
-        if ($line -match '^(gpu_render|gpu_hud_pass|gpu_fx_instancing|gfx_native_jobs|core_balancer|canvas_limiter|mod_optimizer|mod_tick_analyzer|mod_reflection_cache|mod_scene_locator|mod_collision_layers|mod_shader_warmup)\s*=\s*1\s*$') {
+        # Preserve only safe user overrides — not field-test perf flags.
+        if ($line -match '^(ring_log|exception_tracking|exception_tracking_subscribe|stage_poll_seconds|ring_flush_ms|cull_distance_m|display_detail_min|string_cache_max|core_balancer|mod_worker_count|mod_affinity_mask|main_thread_affinity|double_buffer|mod_compute_budget_ms|mod_tick_analyzer|mod_reflection_cache|mod_shader_warmup|mod_layer_projectile|mod_shader_warmup_budget_ms|physics_catch_unity|physics_catch_motor)\s*=\s*(\S+)\s*$') {
             $k = ($line -split '=')[0].Trim()
-            $preserve[$k] = '1'
+            $preserve[$k] = ($line -split '=', 2)[1].Trim()
         }
     }
 }
 Copy-Item -Force (Join-Path $RepoRoot "deploy\noloader_config.ini") $iniPath
 Restore-IniOverrides -Path $iniPath -Overrides $preserve
+
+if ($Minimal) {
+    foreach ($pair in @{
+        'engine_tweaker' = '0'; 'string_cache' = '0'; 'culling_optimizer' = '0'
+        'culling_ground_wheels' = '0'; 'culling_pilot_anim' = '0'; 'culling_offscreen_only' = '0'; 'culling_on_screen_max_m' = '0'
+        'culling_ground_renderer' = '0'; 'fps_adaptive_detail' = '0'
+        'hud_marker_throttle' = '0'; 'hud_markers_per_frame' = '0'
+        'frame_cache' = '0'; 'canvas_limiter' = '0'
+        'gpu_render' = '0'; 'gpu_hud_pass' = '0'; 'gpu_fx_instancing' = '0'
+        'mod_optimizer' = '0'
+    }.GetEnumerator()) {
+        Set-IniKey -Path $iniPath -Key $pair.Key -Value $pair.Value
+    }
+    Write-Host "Minimal INI: Gate L4 only (no perf hooks)"
+}
+
+if ($FieldTest) {
+    Set-IniKey -Path $iniPath -Key "mod_optimizer" -Value "1"
+    Set-IniKey -Path $iniPath -Key "ring_log" -Value "1"
+    Write-Host "FieldTest INI: mod_optimizer=1 ring_log=1 (deploy verify mod separately)"
+}
 
 function Ensure-BootConfigGfxJobs {
     param([string]$Root)
@@ -117,11 +149,32 @@ function Ensure-BootConfigGfxJobs {
     }
 }
 
+function Restore-BootConfigGfxJobsIfIdle {
+    param([string]$Root)
+    $bootPath = Join-Path $Root "NuclearOption_Data\boot.config"
+    if (-not (Test-Path $bootPath)) { return }
+    $stripKeys = @('gfx-enable-gfx-jobs', 'gfx-enable-native-gfx-jobs')
+    $lines = @(Get-Content $bootPath)
+    $filtered = @($lines | Where-Object {
+        $t = $_.Trim()
+        $drop = $false
+        foreach ($k in $stripKeys) { if ($t.StartsWith("$k=")) { $drop = $true; break } }
+        -not $drop
+    })
+    if ($filtered.Count -ne $lines.Count) {
+        Set-Content -Path $bootPath -Value $filtered
+        Write-Host "boot.config gfx-jobs lines removed (gpu hud/fx off)"
+    }
+}
+
 $noloaderIni = Join-Path $GameRoot "noloader_config.ini"
 if (Test-Path $noloaderIni) {
     $iniText = Get-Content $noloaderIni -Raw
-    if ($iniText -match '(?m)^gpu_render\s*=\s*1' -and $iniText -match '(?m)^gfx_native_jobs\s*=\s*1') {
+    $needsGfxJobs = ($iniText -match '(?m)^gpu_hud_pass\s*=\s*1') -or ($iniText -match '(?m)^gpu_fx_instancing\s*=\s*1')
+    if ($needsGfxJobs -and ($iniText -match '(?m)^gfx_native_jobs\s*=\s*1')) {
         Ensure-BootConfigGfxJobs -Root $GameRoot
+    } else {
+        Restore-BootConfigGfxJobsIfIdle -Root $GameRoot
     }
 }
 
@@ -157,7 +210,7 @@ if ($IncludePlayerMods) {
     }
 }
 
-Write-Host "Deployed NOLoader RDYTU core to $DeployRoot (channel: RDY, no dev overlay)"
+Write-Host "Deployed NOLoader RDYTU core to $DeployRoot (channel: RDY, mods cleared)"
 
 . (Join-Path $NOLoaderScriptsRoot "_managed-restore.ps1")
 Remove-InvalidVanillaSnapshots -GameRoot $GameRoot
@@ -179,4 +232,3 @@ if ($gameProc) {
 }
 
 Write-Host "Uninstall / vanilla restore: .\scripts\uninstall-noloader.ps1"
-

@@ -25,7 +25,7 @@ namespace NOLoader.Core.Runtime
         /// <summary>RDYTU perf: slow tick interval seconds.</summary>
         public static float SlowTickIntervalSec { get; private set; } = 1f;
         /// <summary>RDYTU perf: world snapshot refresh stride (frames).</summary>
-        public static int WorldSnapshotStride { get; private set; } = 1;
+        public static int WorldSnapshotStride { get; private set; } = 4;
         /// <summary>RDYTU perf: combined mod budget per frame (ms).</summary>
         public static double ModBudgetMs { get; private set; } = 0.5;
 
@@ -34,11 +34,28 @@ namespace NOLoader.Core.Runtime
         public static bool StringCacheEnabled { get; private set; }
         public static bool HudRefreshSkipEnabled { get; private set; }
         public static bool CullingOptimizerEnabled { get; private set; }
+        /// <summary>Skip GroundVehicle::AnimateWheels when off-screen or low LOD.</summary>
+        public static bool CullingGroundWheelsEnabled { get; private set; }
+        /// <summary>Skip pilot animator on distant units — off in production (thrust regression risk).</summary>
+        public static bool CullingPilotAnimEnabled { get; private set; }
+        /// <summary>When true, visual skip only for units outside main camera frustum.</summary>
+        public static bool CullingOffscreenOnlyEnabled { get; private set; } = true;
+        /// <summary>Skip on-screen ground visuals farther than this (meters); 0 = disabled.</summary>
+        public static float CullingOnScreenMaxM { get; private set; } = 400f;
+        /// <summary>Disable GroundVehicle Renderer components when compound cull applies.</summary>
+        public static bool CullingGroundRendererEnabled { get; private set; }
+        /// <summary>Temporarily lower grass/tree GPU when sustained FPS drops.</summary>
+        public static bool FpsAdaptiveDetailEnabled { get; private set; }
         public static bool FrameCacheEnabled { get; private set; }
         public static bool CanvasLimiterEnabled { get; private set; }
         public static float CullDistanceM { get; private set; } = 5000f;
         public static float DisplayDetailMin { get; private set; } = 1f;
         public static int StringCacheMax { get; private set; } = 2000;
+
+        /// <summary>Round-robin budget for CombatHUD marker WorldToScreenPoint per frame.</summary>
+        public static bool HudMarkerThrottleEnabled { get; private set; }
+        /// <summary>0 = auto (min 4, max 12, M/4).</summary>
+        public static int HudMarkersPerFrame { get; private set; }
 
         public static bool CoreBalancerEnabled { get; private set; }
         public static int ModWorkerCount { get; private set; } = 0;
@@ -61,6 +78,9 @@ namespace NOLoader.Core.Runtime
         public static bool ModShaderWarmupEnabled { get; private set; } = true;
         public static int ModLayerProjectile { get; private set; } = 27;
         public static double ModShaderWarmupBudgetMs { get; private set; } = 50.0;
+
+        /// <summary>Skip GPU tweaker + adaptive trees while cockpit TrackIR is active (vanilla camera path).</summary>
+        public static bool TrackIrSafeModeEnabled { get; private set; } = true;
 
 #if NOLoader_DEV
         /// <summary>UDP Sim-Connect telemetry (DEV.SDK only).</summary>
@@ -169,6 +189,34 @@ namespace NOLoader.Core.Runtime
                     break;
                 case "culling_optimizer":
                     CullingOptimizerEnabled = ParseBool(value, CullingOptimizerEnabled);
+                    if (CullingOptimizerEnabled)
+                    {
+                        CullingGroundWheelsEnabled = true;
+                        CullingPilotAnimEnabled = true;
+                    }
+                    break;
+                case "culling_ground_wheels":
+                    CullingGroundWheelsEnabled = ParseBool(value, CullingGroundWheelsEnabled);
+                    break;
+                case "culling_pilot_anim":
+                    CullingPilotAnimEnabled = ParseBool(value, CullingPilotAnimEnabled);
+                    break;
+                case "culling_offscreen_only":
+                    CullingOffscreenOnlyEnabled = ParseBool(value, CullingOffscreenOnlyEnabled);
+                    break;
+                case "culling_on_screen_max_m":
+                    if (float.TryParse(value, System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out float onScreenMax) && onScreenMax >= 0f)
+                        CullingOnScreenMaxM = onScreenMax;
+                    break;
+                case "culling_ground_renderer":
+                    CullingGroundRendererEnabled = ParseBool(value, CullingGroundRendererEnabled);
+                    break;
+                case "fps_adaptive_detail":
+                    FpsAdaptiveDetailEnabled = ParseBool(value, FpsAdaptiveDetailEnabled);
+                    break;
+                case "trackir_safe_mode":
+                    TrackIrSafeModeEnabled = ParseBool(value, TrackIrSafeModeEnabled);
                     break;
                 case "frame_cache":
                     FrameCacheEnabled = ParseBool(value, FrameCacheEnabled);
@@ -189,6 +237,13 @@ namespace NOLoader.Core.Runtime
                 case "string_cache_max":
                     if (int.TryParse(value, out int cacheMax) && cacheMax >= 256)
                         StringCacheMax = cacheMax;
+                    break;
+                case "hud_marker_throttle":
+                    HudMarkerThrottleEnabled = ParseBool(value, HudMarkerThrottleEnabled);
+                    break;
+                case "hud_markers_per_frame":
+                    if (int.TryParse(value, out int hudBudget) && hudBudget >= 0)
+                        HudMarkersPerFrame = hudBudget;
                     break;
                 case "core_balancer":
                     CoreBalancerEnabled = ParseBool(value, CoreBalancerEnabled);

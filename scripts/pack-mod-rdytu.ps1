@@ -75,6 +75,23 @@ foreach ($p in @($src.patches)) {
     }
 }
 
+$reflectionBake = @()
+foreach ($entry in @($src.reflectionBake)) {
+    $reflectionBake += @{
+        type   = $entry.type
+        method = $entry.method
+    }
+}
+
+$warmup = $null
+if ($src.warmup) {
+    $warmup = @{
+        shaders   = @($src.warmup.shaders)
+        materials = @($src.warmup.materials)
+        prefabs   = @($src.warmup.prefabs)
+    }
+}
+
 $out = [ordered]@{
     idHash       = $idHash
     version      = $src.version
@@ -84,6 +101,9 @@ $out = [ordered]@{
     dependencies = $depHashes
     patches      = $patchList
 }
+
+if ($warmup) { $out.warmup = $warmup }
+if ($reflectionBake.Count -gt 0) { $out.reflectionBake = $reflectionBake }
 
 if ([string]::IsNullOrEmpty($OutputFolder)) {
     $OutputFolder = Join-Path $ModFolder "rdytu"

@@ -30,12 +30,22 @@ namespace NOLoader.Core.EngineTweaker
                     "NOLoader.Core.EngineTweaker.EngineStringCache::DistanceReading", "Redirect", "6AB26B2115C4FE7D"));
             }
 
-            // HUD skip + culling (Pilot/HUD/MFD/wheels) omitted from RDYTU plan — gameplay/throttle regressions.
+            // CameraStateManager — intentionally not patched (vanilla TrackIR / cockpit camera).
 
-            if (RuntimeConfig.FrameCacheEnabled)
+            if (RuntimeConfig.CullingGroundWheelsEnabled)
             {
-                plan.Add(Entry(coreDir, "noloader.tweaker.camupdate", "CameraStateManager::Update",
-                    "NOLoader.Core.EngineTweaker.NOEngineTweakerHooks::CameraStateManagerUpdatePostfix", "Postfix", "21F2AB358AAAB76A"));
+                plan.Add(Entry(coreDir, "noloader.tweaker.gvupdate", "GroundVehicle::Update",
+                    "NOLoader.Core.EngineTweaker.NOEngineTweakerHooks::GroundVehicleUpdatePrefixSkip", "PrefixSkip"));
+                plan.Add(Entry(coreDir, "noloader.tweaker.wheels", "GroundVehicle::AnimateWheels",
+                    "NOLoader.Core.EngineTweaker.NOEngineTweakerHooks::AnimateWheelsPrefixSkip", "PrefixSkip"));
+            }
+
+            if (RuntimeConfig.CullingPilotAnimEnabled)
+            {
+                plan.Add(Entry(coreDir, "noloader.tweaker.pilot", "Pilot::Update",
+                    "NOLoader.Core.EngineTweaker.NOEngineTweakerHooks::PilotUpdatePrefix", "Prefix"));
+                plan.Add(Entry(coreDir, "noloader.tweaker.pilotdismount", "PilotDismounted::FixedUpdate",
+                    "NOLoader.Core.EngineTweaker.NOEngineTweakerHooks::PilotDismountedFixedUpdatePrefix", "Prefix"));
             }
 
             return plan;
@@ -66,7 +76,7 @@ namespace NOLoader.Core.EngineTweaker
             string target,
             string inject,
             string method,
-            string hash)
+            string? hash = null)
         {
             return new PatchEntry
             {

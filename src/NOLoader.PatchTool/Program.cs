@@ -99,8 +99,8 @@ namespace NOLoader.PatchTool
 
             int errors = 0;
 
-            errors += ApplyModule(gameRoot, loaderRoot, "Assembly-CSharp.dll", CoreBootstrapPatches.CreateGameAssemblyPlan(loaderRoot));
-            errors += ApplyModule(gameRoot, loaderRoot, "UnityEngine.CoreModule.dll", CoreBootstrapPatches.CreateUnityCorePlan(loaderRoot));
+            errors += ApplyGameAssembly(gameRoot, loaderRoot);
+            errors += ApplyUnityCoreModule(gameRoot, loaderRoot);
 
             var physicsPlan = CoreBootstrapPatches.CreateUnityPhysicsPlan(loaderRoot);
             if (physicsPlan.Count == 0)
@@ -205,6 +205,85 @@ namespace NOLoader.PatchTool
         private static void ClearUiPatchState(string loaderRoot)
         {
             PatchStateCache.Record(loaderRoot, "UnityEngine.UI.dll", Array.Empty<string>());
+        }
+
+        private static int ApplyGameAssembly(string gameRoot, string loaderRoot)
+        {
+            const string moduleFile = "Assembly-CSharp.dll";
+            bool stringCacheNeeded = RuntimeConfig.EngineTweakerEnabled && RuntimeConfig.StringCacheEnabled;
+            bool groundWheelsNeeded = RuntimeConfig.EngineTweakerEnabled && RuntimeConfig.CullingGroundWheelsEnabled;
+            bool pilotAnimNeeded = RuntimeConfig.EngineTweakerEnabled && RuntimeConfig.CullingPilotAnimEnabled;
+            bool camPatchNeeded = false;
+            bool detailLateUpdatePatchNeeded = false;
+            bool motorCatchNeeded = RuntimeConfig.PhysicsCatchMotor;
+
+            bool stringCacheOnDisk = PatchStateCache.TryIsPatched(gameRoot, moduleFile, "SpeedReading");
+            bool groundWheelsOnDisk = PatchStateCache.TryIsPatched(gameRoot, moduleFile, "AnimateWheelsPrefixSkip")
+                || PatchStateCache.TryIsPatched(gameRoot, moduleFile, "GroundVehicleUpdatePrefixSkip");
+            bool pilotAnimOnDisk = PatchStateCache.TryIsPatched(gameRoot, moduleFile, "PilotUpdatePrefix")
+                || PatchStateCache.TryIsPatched(gameRoot, moduleFile, "PilotDismountedFixedUpdatePrefix");
+            bool camPatchOnDisk = PatchStateCache.TryIsPatched(gameRoot, moduleFile, "CameraStateManagerUpdatePostfix")
+                || PatchStateCache.TryIsPatched(gameRoot, moduleFile, "CameraStateManagerLateUpdatePostfix");
+            bool detailLateUpdateOnDisk = PatchStateCache.TryIsPatched(gameRoot, moduleFile, "DetailLateUpdatePrefixSkip");
+            bool motorCatchOnDisk = PatchStateCache.TryIsPatched(gameRoot, moduleFile, "ThrustPrefix");
+
+            bool hudMarkerNeeded = RuntimeConfig.HudMarkerThrottleEnabled;
+            bool hudMarkerOnDisk = PatchStateCache.TryIsPatched(gameRoot, moduleFile, "UpdateMarkersPrefix");
+
+            bool gpuHudNeeded = RuntimeConfig.GpuRenderEnabled && RuntimeConfig.GpuHudPassEnabled;
+            bool gpuHudOnDisk = PatchStateCache.TryIsPatched(gameRoot, moduleFile, "CombatHudLateUpdatePostfix");
+
+            bool restoreVanilla = (!stringCacheNeeded && stringCacheOnDisk)
+                || (!groundWheelsNeeded && groundWheelsOnDisk)
+                || (!pilotAnimNeeded && pilotAnimOnDisk)
+                || (camPatchOnDisk && !camPatchNeeded)
+                || (detailLateUpdateOnDisk && !detailLateUpdatePatchNeeded)
+                || (!motorCatchNeeded && motorCatchOnDisk)
+                || (!hudMarkerNeeded && hudMarkerOnDisk)
+                || (!gpuHudNeeded && gpuHudOnDisk);
+
+            if (restoreVanilla)
+            {
+                try
+                {
+                    if (AssemblyPatcher.RestoreManagedModuleFromBackup(gameRoot, moduleFile))
+                        Console.WriteLine("Rebased " + moduleFile + " on vanilla (perf hooks disabled — IL removed)");
+                    else
+                        Console.Error.WriteLine("[" + moduleFile + "] perf IL present; vanilla snapshot missing");
+                }
+                catch (IOException ex)
+                {
+                    Console.Error.WriteLine("[" + moduleFile + "] vanilla restore failed (close game/Steam): " + ex.Message);
+                    return 1;
+                }
+            }
+
+            return ApplyModule(gameRoot, loaderRoot, moduleFile, CoreBootstrapPatches.CreateGameAssemblyPlan(loaderRoot));
+        }
+
+        private static int ApplyUnityCoreModule(string gameRoot, string loaderRoot)
+        {
+            const string moduleFile = "UnityEngine.CoreModule.dll";
+            bool findNeeded = RuntimeConfig.ModOptimizerEnabled && RuntimeConfig.ModSceneLocatorEnabled;
+            bool findOnDisk = PatchStateCache.TryIsPatched(gameRoot, moduleFile, "FindRedirect");
+
+            if (!findNeeded && findOnDisk)
+            {
+                try
+                {
+                    if (AssemblyPatcher.RestoreManagedModuleFromBackup(gameRoot, moduleFile))
+                        Console.WriteLine("Rebased " + moduleFile + " on vanilla (mod_optimizer/scene_locator off — Find redirect removed)");
+                    else
+                        Console.Error.WriteLine("[" + moduleFile + "] Find redirect present; vanilla snapshot missing");
+                }
+                catch (IOException ex)
+                {
+                    Console.Error.WriteLine("[" + moduleFile + "] vanilla restore failed (close game/Steam): " + ex.Message);
+                    return 1;
+                }
+            }
+
+            return ApplyModule(gameRoot, loaderRoot, moduleFile, CoreBootstrapPatches.CreateUnityCorePlan(loaderRoot));
         }
 
         private static int ApplyModule(string gameRoot, string loaderRoot, string moduleFile, List<PatchEntry> plan)

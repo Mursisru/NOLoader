@@ -54,10 +54,15 @@ namespace NOLoader.Core.ModOptimizer
                 return false;
 
             string name = assembly.GetName().Name ?? string.Empty;
+            return IsModAssemblyByName(name);
+        }
+
+        internal static bool IsModAssemblyByName(string name)
+        {
             if (string.IsNullOrEmpty(name))
                 return false;
 
-            if (CoreAssemblies.Contains(name))
+            if (IsCoreAssemblyName(name))
                 return false;
 
             if (name.StartsWith("UnityEngine.", StringComparison.OrdinalIgnoreCase))
@@ -68,6 +73,9 @@ namespace NOLoader.Core.ModOptimizer
 
             return ModIdByAssembly.ContainsKey(name);
         }
+
+        internal static bool IsCoreAssemblyName(string name)
+            => CoreAssemblies.Contains(name);
     }
 }
 #endif

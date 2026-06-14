@@ -6,7 +6,8 @@ namespace NOLoader.Core.EngineTweaker
     internal static class CanvasRebuildLimiter
     {
         private static int _frameId = -1;
-        private static readonly HashSet<int> _seenElements = new HashSet<int>();
+        // Reference identity — GetHashCode() caused false blocks (missing HUD textures).
+        private static readonly HashSet<object> _seenElements = new HashSet<object>();
         private static long _blocked;
         private static long _passed;
 
@@ -37,8 +38,7 @@ namespace NOLoader.Core.EngineTweaker
                 _seenElements.Clear();
             }
 
-            int key = element.GetHashCode();
-            if (_seenElements.Add(key))
+            if (_seenElements.Add(element))
             {
                 _passed++;
                 return false;

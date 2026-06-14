@@ -41,8 +41,32 @@ This will:
 2. Copy core DLLs to `NOLoader/core/`
 3. Copy `winhttp.dll` proxy to game root
 4. Copy `noloader_config.ini`
-5. Clear `NOLoader/mods/*` (except README) — **no bundled mods**
+5. Clear `NOLoader/mods/*` — **all mod folders removed** (verify mods are not kept; use field-test scripts)
 6. Run PatchTool (Cecil pre-patch)
+
+Production deploy uses [`deploy/noloader_config.ini`](../deploy/noloader_config.ini) defaults (`mod_optimizer=0`, `gpu_render=0`, `frame_cache=0`). Field-test flags are **not** preserved across redeploy.
+
+```powershell
+# Field test base INI only (verify mod deployed separately):
+& "...\RDYTU\deploy-noloader.ps1" -FieldTest
+& "...\RDYTU\deploy-modoptimizer-verify-mod.ps1" -EnableModOptimizer
+```
+
+### FPS benchmark profiles
+
+```powershell
+& "...\RDYTU\benchmark-noloader-profile.ps1"           # status
+& "...\RDYTU\benchmark-noloader-profile.ps1" -Profile B  # production minimal
+& "...\RDYTU\benchmark-noloader-profile.ps1" -Profile C  # fieldtest INI base
+```
+
+| Profile | INI | mods/ |
+|---------|-----|-------|
+| A vanilla | NOLoader off | — |
+| B minimal | production template | empty |
+| C fieldtest | `-FieldTest` + explicit verify deploy | one *Verify |
+
+**Verify mods** (`ModOptimizerVerify`, `GpuRenderVerify`, `CoreBalancerVerify`, `MechanicsVerify`) live in `DEV.SDK/mods/` only — **do not leave in `NOLoader/mods/` for flight**.
 
 ### Optional player mods
 
@@ -95,6 +119,31 @@ Section `[RDYTU]` — **DEV.SDK ignores this section**.
 | `exception_tracking_subscribe=0` | off | No Unity log hook unless enabled |
 | `stage_poll_seconds=1.0` | legacy | Ignored — mission uses `sceneLoaded` events |
 | `ring_flush_ms=8000` | 8s | Background flush when `ring_log=1` |
+
+### What affects FPS vs mod-only features
+
+| Feature | Base-game FPS | Mod benefit |
+|---------|---------------|-------------|
+| Gate L4 only (`deploy -Minimal`) | ~1 FPS overhead | — |
+| **maxopt (DEV9O11 production)** | ground cull + adaptive trees + HUD throttle | vanilla camera/TrackIR via `trackir_safe_mode` |
+| `culling_ground_renderer=1` | GPU mesh off for skipped GV | horizon GPU 96% scenario |
+| `fps_adaptive_detail=1` | runtime tree/grass throttle when FPS &lt;58 | grass `DetailRenderer` bottleneck |
+| `culling_pilot_anim=1` | **opt-in** — field test only; thrust regression risk |
+| `culling_optimizer=1` | **legacy** — enables both ground wheels + pilot anim |
+| `gpu_hud_pass=1` | **experimental** — opt-in field test only | — |
+| `canvas_limiter=1` | **experimental** — can break RawImage HUD textures | — |
+| `string_cache=1` | opt-in only (not production) | HUD text mods |
+| `world_snapshot_stride=4` | mod path only | mods using `ActivateWorld()` |
+| `mod_optimizer=1` | Find IL overhead | mod scene locator |
+| Verify mods in `mods/` | DDOL probes, ticks | field test only |
+
+Ring log on boot: `[NOLoader] perf profile=minimal|maxopt|fieldtest`.
+
+Deploy minimal rollback: `.\scripts\RDYTU\deploy-noloader.ps1 -Minimal`
+
+Benchmark: `.\scripts\RDYTU\benchmark-noloader-profile.ps1 -Profile B` (maxopt) or `-Profile D` (minimal).
+
+**Airport A/B (DEV9O7):** цель **≥60 FPS** оба прогона; TrackIR + extreme pan back — без тряски; `ring_log=1` → `.\scripts\RDYTU\parse-ground-cull-ringlog.ps1`.
 
 ---
 
