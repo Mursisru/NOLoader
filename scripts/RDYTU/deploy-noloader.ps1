@@ -2,7 +2,8 @@ param(
     [string]$GameRoot = "C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option",
     [switch]$IncludePlayerMods,
     [switch]$FieldTest,
-    [switch]$Minimal
+    [switch]$Minimal,
+    [switch]$RdytuMini
 )
 
 $ErrorActionPreference = "Stop"
@@ -103,6 +104,10 @@ if (Test-Path $iniPath) {
     }
 }
 Copy-Item -Force (Join-Path $RepoRoot "deploy\noloader_config.ini") $iniPath
+if ($RdytuMini) {
+    Copy-Item -Force (Join-Path $RepoRoot "deploy\noloader_config.mini.ini") $iniPath
+    Write-Host "RDYTU.mini INI: mod_optimizer only (rdytu_mini=1)"
+}
 Restore-IniOverrides -Path $iniPath -Overrides $preserve
 
 if ($Minimal) {
@@ -210,7 +215,7 @@ if ($IncludePlayerMods) {
     }
 }
 
-Write-Host "Deployed NOLoader RDYTU core to $DeployRoot (channel: RDY, mods cleared)"
+Write-Host "Deployed NOLoader RDYTU core to $DeployRoot (channel: $(if ($RdytuMini) { 'RDYTU.mini' } else { 'RDY' }), mods cleared)"
 
 . (Join-Path $NOLoaderScriptsRoot "_managed-restore.ps1")
 Remove-InvalidVanillaSnapshots -GameRoot $GameRoot

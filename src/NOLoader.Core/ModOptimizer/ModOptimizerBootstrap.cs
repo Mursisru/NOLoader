@@ -38,10 +38,7 @@ namespace NOLoader.Core.ModOptimizer
             _initialized = true;
 
             if (!RuntimeConfig.ModOptimizerEnabled)
-            {
-                RingBufferLog.WriteAscii("[ModOpt] disabled (mod_optimizer=0)");
                 return;
-            }
 
             if (RuntimeConfig.ModSceneLocatorEnabled)
                 ModNativeGameObjectFind.Initialize();
@@ -50,12 +47,15 @@ namespace NOLoader.Core.ModOptimizer
             NOModRuntime.Scene = ModSceneLocator.Instance;
             NOModRuntime.Collision = ModCollisionRegistry.Instance;
 
-            RingBufferLog.WriteAscii("[ModOpt] enabled analyzer=" + RuntimeConfig.ModTickAnalyzerEnabled
-                + " reflection=" + RuntimeConfig.ModReflectionCacheEnabled
-                + " scene=" + RuntimeConfig.ModSceneLocatorEnabled
-                + " collision=" + RuntimeConfig.ModCollisionLayersEnabled
-                + " warmup=" + RuntimeConfig.ModShaderWarmupEnabled
-                + " layer=" + RuntimeConfig.ModLayerProjectile);
+            if (!RuntimeConfig.RdytuMiniEnabled)
+            {
+                RingBufferLog.WriteAscii("[ModOpt] enabled analyzer=" + RuntimeConfig.ModTickAnalyzerEnabled
+                    + " reflection=" + RuntimeConfig.ModReflectionCacheEnabled
+                    + " scene=" + RuntimeConfig.ModSceneLocatorEnabled
+                    + " collision=" + RuntimeConfig.ModCollisionLayersEnabled
+                    + " warmup=" + RuntimeConfig.ModShaderWarmupEnabled
+                    + " layer=" + RuntimeConfig.ModLayerProjectile);
+            }
         }
 
         internal static void OnModAssemblyLoaded(Assembly assembly, int modIdHash)

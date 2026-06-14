@@ -79,6 +79,9 @@ namespace NOLoader.Core.Runtime
         public static int ModLayerProjectile { get; private set; } = 27;
         public static double ModShaderWarmupBudgetMs { get; private set; } = 50.0;
 
+        /// <summary>RDYTU.mini — mod load optimizer only; no engine/gpu/hud perf IL.</summary>
+        public static bool RdytuMiniEnabled { get; private set; }
+
         /// <summary>Skip GPU tweaker + adaptive trees while cockpit TrackIR is active (vanilla camera path).</summary>
         public static bool TrackIrSafeModeEnabled { get; private set; } = true;
 
@@ -126,13 +129,55 @@ namespace NOLoader.Core.Runtime
                 string value = line.Substring(eq + 1).Trim();
                 Apply(key, value);
             }
+
+            if (RdytuMiniEnabled)
+                ApplyRdytuMiniProfile();
 #endif
+        }
+
+        private static void ApplyRdytuMiniProfile()
+        {
+            RingLogEnabled = false;
+            PhysicsCatchUnity = false;
+            PhysicsCatchMotor = false;
+            ExceptionTracking = true;
+            ExceptionTrackingNeedsSubscription = false;
+
+            EngineTweakerEnabled = false;
+            StringCacheEnabled = false;
+            HudRefreshSkipEnabled = false;
+            CullingOptimizerEnabled = false;
+            CullingGroundWheelsEnabled = false;
+            CullingPilotAnimEnabled = false;
+            CullingOffscreenOnlyEnabled = false;
+            CullingGroundRendererEnabled = false;
+            FpsAdaptiveDetailEnabled = false;
+            TrackIrSafeModeEnabled = false;
+            FrameCacheEnabled = false;
+            CanvasLimiterEnabled = false;
+            HudMarkerThrottleEnabled = false;
+
+            CoreBalancerEnabled = false;
+            GpuRenderEnabled = false;
+            GpuHudPassEnabled = false;
+            GpuFxInstancingEnabled = false;
+            GpuMetricsEnabled = false;
+
+            ModOptimizerEnabled = true;
+            ModTickAnalyzerEnabled = true;
+            ModReflectionCacheEnabled = true;
+            ModSceneLocatorEnabled = true;
+            ModCollisionLayersEnabled = false;
+            ModShaderWarmupEnabled = true;
         }
 
         private static void Apply(string key, string value)
         {
             switch (key)
             {
+                case "rdytu_mini":
+                    RdytuMiniEnabled = ParseBool(value, RdytuMiniEnabled);
+                    break;
                 case "ring_log":
                 case "ringlog":
                     RingLogEnabled = ParseBool(value, RingLogEnabled);

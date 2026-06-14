@@ -51,18 +51,29 @@ namespace NOLoader.Core
             Runtime.RuntimeConfig.Load(GameRoot);
             Directory.CreateDirectory(Path.Combine(LoaderRoot, "logs"));
 #if !NOLoader_DEV
-            Runtime.Balance.CoreBalancerBootstrap.Initialize();
-            GpuRender.GpuRenderBootstrap.Initialize(GameRoot);
+            if (!Runtime.RuntimeConfig.RdytuMiniEnabled)
+            {
+                Runtime.Balance.CoreBalancerBootstrap.Initialize();
+                GpuRender.GpuRenderBootstrap.Initialize(GameRoot);
+            }
+
             ModOptimizer.ModOptimizerBootstrap.Initialize(GameRoot);
 #endif
 
             ModAssemblyCache.Build(LoaderRoot, GameRoot);
-            RingBufferLog.StartBackgroundFlush(LoaderRoot);
-            RingBufferLog.WriteAscii("[NOLoader] ModAssemblyCache entries=" + ModAssemblyCache.EntryCount);
 
-            RingBufferLog.WriteAscii("[NOLoader] Bootstrap.Initialize");
-            RingBufferLog.WriteAscii($"[NOLoader] {AppVersion.Display}");
-            RingBufferLog.WriteAscii("[NOLoader] perf profile=" + BuildPerfProfileLabel());
+            if (Runtime.RuntimeConfig.RdytuMiniEnabled)
+            {
+                // Single boot line written after mod load (MiniBootLog).
+            }
+            else
+            {
+                RingBufferLog.StartBackgroundFlush(LoaderRoot);
+                RingBufferLog.WriteAscii("[NOLoader] ModAssemblyCache entries=" + ModAssemblyCache.EntryCount);
+                RingBufferLog.WriteAscii("[NOLoader] Bootstrap.Initialize");
+                RingBufferLog.WriteAscii($"[NOLoader] {AppVersion.Display}");
+                RingBufferLog.WriteAscii("[NOLoader] perf profile=" + BuildPerfProfileLabel());
+            }
 
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
@@ -107,11 +118,15 @@ namespace NOLoader.Core
                 RingBufferLog.WriteAscii("[GateL1] " + err);
 
             ModPatchAssemblyPreloader.EnsureLoaded(manifests, LoaderRoot);
-            EngineTweaker.NOEngineTweakerBootstrap.Initialize();
 #if !NOLoader_DEV
-            Runtime.Perf.ModRuntimeHost.EnsureForEngineTweaker();
+            if (!Runtime.RuntimeConfig.RdytuMiniEnabled)
+            {
+                EngineTweaker.NOEngineTweakerBootstrap.Initialize();
+                Runtime.Perf.ModRuntimeHost.EnsureForEngineTweaker();
+            }
 #endif
-            RingBufferLog.WriteAscii("[NOLoader] MainMenu hook fired (cache=" + ModAssemblyCache.EntryCount + ")");
+            if (!Runtime.RuntimeConfig.RdytuMiniEnabled)
+                RingBufferLog.WriteAscii("[NOLoader] MainMenu hook fired (cache=" + ModAssemblyCache.EntryCount + ")");
 
             try
             {
@@ -389,6 +404,9 @@ namespace NOLoader.Core
 #if !NOLoader_DEV
         private static string BuildPerfProfileLabel()
         {
+            if (Runtime.RuntimeConfig.RdytuMiniEnabled)
+                return "mini";
+
             bool maxOpt = Runtime.RuntimeConfig.HudMarkerThrottleEnabled
                 || Runtime.RuntimeConfig.CullingGroundWheelsEnabled
                 || Runtime.RuntimeConfig.CullingGroundRendererEnabled
@@ -439,6 +457,11 @@ namespace NOLoader.Core
 
 #if NOLoader_DEV
             UnityLogBridge.Log("[NOLoader] Core started " + AppVersion.Display);
+#endif
+#if !NOLoader_DEV
+            if (Runtime.RuntimeConfig.RdytuMiniEnabled)
+                MiniBootLog.TryWrite(LoaderRoot);
+            else
 #endif
             RingBufferLog.WriteAscii("[NOLoader] Core started " + AppVersion.Display);
         }

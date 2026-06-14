@@ -30,9 +30,12 @@ namespace NOLoader.Core.Patching
                 "NOLoader.Core.Gates.MissionGateHooks::CanLoadPrefixSkip", "PrefixSkip"));
 
 #if !NOLoader_DEV
-            plan.AddRange(EngineTweaker.EngineTweakerPatches.CreateGamePlan(coreDir));
-            plan.AddRange(EngineTweaker.HudMarkerPatches.CreateGamePlan(coreDir));
-            plan.AddRange(GpuRender.GpuRenderPatches.CreateGamePlan(coreDir));
+            if (!RuntimeConfig.RdytuMiniEnabled)
+            {
+                plan.AddRange(EngineTweaker.EngineTweakerPatches.CreateGamePlan(coreDir));
+                plan.AddRange(EngineTweaker.HudMarkerPatches.CreateGamePlan(coreDir));
+                plan.AddRange(GpuRender.GpuRenderPatches.CreateGamePlan(coreDir));
+            }
 #endif
 
             return plan;
@@ -78,6 +81,9 @@ namespace NOLoader.Core.Patching
             return new List<PatchEntry>();
 #else
             string coreDir = Path.Combine(loaderRoot, "core");
+            if (RuntimeConfig.RdytuMiniEnabled)
+                return new List<PatchEntry>();
+
             var plan = EngineTweaker.EngineTweakerPatches.CreateUnityUiPlan(coreDir);
             return plan;
 #endif

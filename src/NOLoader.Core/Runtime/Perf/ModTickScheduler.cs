@@ -92,7 +92,8 @@ namespace NOLoader.Core.Runtime.Perf
             if (now >= _nextTweakerLogTime)
             {
                 _nextTweakerLogTime = now + 30f;
-                NOEngineTweakerBootstrap.LogPeriodicStats();
+                if (!RuntimeConfig.RdytuMiniEnabled)
+                    NOEngineTweakerBootstrap.LogPeriodicStats();
             }
 
             for (int i = 0; i < SlowMods.Count; i++)

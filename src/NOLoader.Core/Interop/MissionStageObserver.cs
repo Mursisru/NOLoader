@@ -25,7 +25,8 @@ namespace NOLoader.Core.Interop
 
         private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            EngineTweaker.NOEngineTweakerBootstrap.OnSceneChanged();
+            if (!Runtime.RuntimeConfig.RdytuMiniEnabled)
+                EngineTweaker.NOEngineTweakerBootstrap.OnSceneChanged();
             if (!ModLifecycleManager.IsMainMenuReady || ModLifecycleManager.IsMissionReady)
                 return;
 
