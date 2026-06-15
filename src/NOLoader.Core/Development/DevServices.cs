@@ -184,6 +184,8 @@ namespace NOLoader.Core.Development
             };
             _dllWatcher.Changed += (_, __) => ScheduleReload();
             _dllWatcher.Created += (_, __) => ScheduleReload();
+            _dllWatcher.Deleted += (_, __) => ScheduleReload();
+            _dllWatcher.Renamed += (_, __) => ScheduleReload();
             _dllWatcher.EnableRaisingEvents = true;
 
             _sourceWatcher = new FileSystemWatcher(modsRoot)
@@ -194,6 +196,8 @@ namespace NOLoader.Core.Development
             };
             _sourceWatcher.Changed += (_, e) => ScriptCompileService.ScheduleBuild(e.FullPath);
             _sourceWatcher.Created += (_, e) => ScriptCompileService.ScheduleBuild(e.FullPath);
+            _sourceWatcher.Deleted += (_, __) => ScheduleReload();
+            _sourceWatcher.Renamed += (_, __) => ScheduleReload();
             _sourceWatcher.EnableRaisingEvents = true;
         }
 
@@ -218,8 +222,9 @@ namespace NOLoader.Core.Development
                 GC.Collect();
             });
 
+            ModLifecycleManager.SyncWithDisk();
             ModLifecycleManager.ReloadAllMods();
-            RingBufferLog.WriteAscii("[NOLoader] Hot-reload complete (assets unloaded + mods reloaded)");
+            RingBufferLog.WriteAscii("[NOLoader] Hot-reload complete (mods synced + reloaded)");
         }
     }
 

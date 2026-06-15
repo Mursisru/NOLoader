@@ -73,21 +73,78 @@ namespace NOLoader.Core.Mods
         {
             _gameRoot = gameRoot;
             _loaderRoot = loaderRoot;
-            _manifests = manifests;
-
-            var ordered = TopologicalSort(manifests.Where(m => m.Valid).ToList());
-            foreach (ModManifest manifest in ordered)
-            {
-                Mods.Add(new LoadedMod { Manifest = manifest });
-            }
-
 #if !NOLoader_DEV
             NOModPerfBootstrap.Initialize();
 #endif
-            ActivateStage(LoadStage.PreMenu);
+            ReconcileWithManifests(manifests, isInitialBootstrap: true);
 
             if (RequiresMissionStage(manifests))
                 MissionStageObserver.Install();
+        }
+
+        /// <summary>Rescan mods folder — unload removed mods, register new ones (DEV hot-reload).</summary>
+        public static void SyncWithDisk()
+        {
+            if (string.IsNullOrEmpty(_loaderRoot))
+                return;
+
+            if (!UnityMainThread.IsMainThread)
+            {
+                UnityMainThread.Invoke(SyncWithDisk);
+                return;
+            }
+
+            string modsRoot = Path.Combine(_loaderRoot, "mods");
+            var manifests = ModManifestPipeline.ReadValidated(modsRoot, out _, _gameRoot);
+            ReconcileWithManifests(manifests, isInitialBootstrap: false);
+        }
+
+        private static void ReconcileWithManifests(IReadOnlyList<ModManifest> manifests, bool isInitialBootstrap)
+        {
+            _manifests = manifests;
+
+            var valid = TopologicalSort(manifests.Where(m => m.Valid).ToList());
+            var validKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (ModManifest manifest in valid)
+                validKeys.Add(ModKey(manifest));
+
+            for (int i = Mods.Count - 1; i >= 0; i--)
+            {
+                LoadedMod mod = Mods[i];
+                if (validKeys.Contains(ModKey(mod.Manifest)) && Directory.Exists(mod.Manifest.FolderPath))
+                    continue;
+
+                if (mod.Loaded || mod.Instance != null)
+                    UnloadMod(mod);
+
+                string label = ModLabel(mod.Manifest);
+                Mods.RemoveAt(i);
+                RingBufferLog.WriteAscii("[NOLoader] Mod removed from disk: " + label);
+            }
+
+            var existingKeys = new HashSet<string>(Mods.Select(m => ModKey(m.Manifest)), StringComparer.OrdinalIgnoreCase);
+            foreach (ModManifest manifest in valid)
+            {
+                if (existingKeys.Contains(ModKey(manifest)))
+                    continue;
+
+                var entry = new LoadedMod { Manifest = manifest };
+                Mods.Add(entry);
+                existingKeys.Add(ModKey(manifest));
+                if (!isInitialBootstrap && manifest.LoadStage <= _currentStage && !entry.Failed)
+                    LoadMod(entry);
+            }
+
+            if (isInitialBootstrap)
+            {
+                ActivateStage(LoadStage.PreMenu);
+                return;
+            }
+
+            ModAssemblyCache.Rebuild(_loaderRoot, _gameRoot);
+            ModPatchAssemblyPreloader.Reset();
+            ModPatchAssemblyPreloader.EnsureLoaded(manifests, _loaderRoot);
+            ModIlAssemblyLoadHook.Register(manifests, _loaderRoot);
         }
 
         private static IReadOnlyList<ModManifest>? _manifests;
@@ -296,6 +353,26 @@ namespace NOLoader.Core.Mods
             catch { /* best effort */ }
             mod.Instance = null;
             mod.Assembly = null;
+            mod.Loaded = false;
+        }
+
+        private static string ModKey(ModManifest manifest)
+        {
+            if (!string.IsNullOrEmpty(manifest.FolderPath))
+                return manifest.FolderPath;
+
+            if (!string.IsNullOrEmpty(manifest.Id))
+                return manifest.Id;
+
+            return manifest.IdHash.ToString("X8");
+        }
+
+        private static string ModLabel(ModManifest manifest)
+        {
+            if (!string.IsNullOrEmpty(manifest.Id))
+                return manifest.Id;
+
+            return manifest.IdHash.ToString("X8");
         }
 
         private static List<ModManifest> TopologicalSort(List<ModManifest> manifests)

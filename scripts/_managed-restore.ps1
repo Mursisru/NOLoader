@@ -215,6 +215,25 @@ function Restore-VanillaManagedModules {
     Invoke-SteamVerifyManaged -GameRoot $GameRoot -SteamAppId $SteamAppId -WaitSeconds $WaitSeconds
 }
 
+function Deploy-NOLoaderRestoreHelper {
+    param(
+        [string]$GameRoot,
+        [string]$RepoRoot,
+        [string]$Configuration = "RDYTU"
+    )
+    $patchTool = Get-ChildItem -Path (Join-Path $RepoRoot "src\NOLoader.PatchTool\bin") -Recurse -Filter "NOLoader.PatchTool.exe" -ErrorAction SilentlyContinue |
+        Where-Object { $_.DirectoryName -like "*\bin\$Configuration\*" } |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
+    if (-not $patchTool) { return }
+    Copy-Item -Force $patchTool.FullName (Join-Path $GameRoot "NOLoaderRestore.exe")
+    $cmd = Join-Path $RepoRoot "deploy\NOLoaderRestore.cmd"
+    if (Test-Path $cmd) {
+        Copy-Item -Force $cmd (Join-Path $GameRoot "NOLoaderRestore.cmd")
+    }
+    Write-Host "Deployed NOLoaderRestore.exe (vanilla repair without Steam verify)"
+}
+
 function Remove-NOLoaderInstallFiles {
     param([string]$GameRoot)
     foreach ($rel in @("winhttp.dll", "noloader_config.ini")) {

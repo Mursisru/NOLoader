@@ -1,4 +1,4 @@
-﻿param(
+param(
     [string]$RepoRoot = ""
 )
 
@@ -16,7 +16,7 @@ if (Test-Path $PackedRoot) {
 
 $playerModRoots = Get-ChildItem (Join-Path $RepoRoot "deploy\NOLoader\mods") -Directory -ErrorAction SilentlyContinue
 if (-not $playerModRoots -or $playerModRoots.Count -eq 0) {
-    Write-Host "No player mods under deploy\NOLoader\mods вЂ” packed folder cleared."
+    Write-Host "No player mods under deploy\NOLoader\mods — packed folder cleared."
     exit 0
 }
 

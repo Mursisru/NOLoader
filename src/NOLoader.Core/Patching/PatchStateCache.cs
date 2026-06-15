@@ -53,6 +53,23 @@ namespace NOLoader.Core.Patching
             return AssemblyMarkerScan.Contains(gameRoot, moduleFile, marker);
         }
 
+        public static IReadOnlyList<string> GetRecordedMarkers(string loaderRoot, string moduleFile)
+        {
+            EnsureLoaded(loaderRoot);
+            if (_entries == null || !_entries.TryGetValue(moduleFile, out string? raw) || string.IsNullOrEmpty(raw))
+                return System.Array.Empty<string>();
+
+            var list = new List<string>();
+            foreach (string part in raw.Split(','))
+            {
+                string trimmed = part.Trim();
+                if (trimmed.Length > 0)
+                    list.Add(trimmed);
+            }
+
+            return list;
+        }
+
         private static void EnsureLoaded(string loaderRoot)
         {
             if (_entries != null)
