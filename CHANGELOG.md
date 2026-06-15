@@ -1,4 +1,4 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to NOLoader. Version strings in code: `AppVersion.cs` (`DEV1PM*` / `RDY1R*`).
 
@@ -6,16 +6,15 @@ All notable changes to NOLoader. Version strings in code: `AppVersion.cs` (`DEV1
 
 ### Release assets (tag `v0.1.0`)
 
-- **NOLoader-0.1.0-RDYTU.zip** — player core (optimized, no telemetry, no bundled mods)
-- **NOLoader-0.1.0-DEV.SDK.zip** — developer core + telemetry + sample mod sources
+- **NOLoader-0.1.0-RDYTU.zip** вЂ” player core (optimized, no telemetry, no bundled mods)
+- **NOLoader-0.1.0-DEV.SDK.zip** вЂ” developer core + telemetry + sample mod sources
+- **NOLoader-0.1.0-RDYTU.mini.zip** — mod optimizer only (
+oloader_config.mini.ini)
 
 ### Documentation
 
 - Full README, ARCHITECTURE, RDYTU, DEV_SDK, MOD_AUTHOR, GATES, INSTALL
-<<<<<<< HEAD
-=======
 - PowerShell scripts in `scripts/`
->>>>>>> 37d3b8a (Docs: remove private paths; restore scripts in repo)
 
 ### RDYTU `0.1.0 Build RDY1R6`
 
