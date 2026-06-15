@@ -143,7 +143,7 @@ Deploy minimal rollback: `.\scripts\RDYTU\deploy-noloader.ps1 -Minimal`
 
 Benchmark: `.\scripts\RDYTU\benchmark-noloader-profile.ps1 -Profile B` (maxopt) or `-Profile D` (minimal).
 
-**Airport A/B (DEV9O7):** цель **≥60 FPS** оба прогона; TrackIR + extreme pan back — без тряски; `ring_log=1` → `.\scripts\RDYTU\parse-ground-cull-ringlog.ps1`.
+**Airport A/B (DEV9O7):** target **≥60 FPS** on both runs; TrackIR + extreme pan back — no jitter; `ring_log=1` → `.\scripts\RDYTU\parse-ground-cull-ringlog.ps1`.
 
 ---
 

@@ -157,3 +157,6 @@ if ($SkipCecilPrePatch) {
     }
 }
 
+. (Join-Path $NOLoaderScriptsRoot "_managed-restore.ps1")
+Deploy-NOLoaderRestoreHelper -GameRoot $GameRoot -RepoRoot $RepoRoot -Configuration $Configuration
+

@@ -21,6 +21,7 @@ $marker = Join-Path $GameRoot "NOLoader_UNINSTALLED.txt"
 NOLoader removed at: $(Get-Date -Format o)
 
 Managed DLLs restored to vanilla (no IL patches).
+winhttp.dll removed — if you deleted NOLoader manually earlier, use NOLoaderRestore.exe in game root next time.
 Re-install:
   .\scripts\deploy-noloader.ps1 -Configuration RDYTU
 "@ | Set-Content -Encoding UTF8 $marker

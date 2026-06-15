@@ -17,6 +17,14 @@ namespace NOLoader.Core.Patching
 
         public static void MarkMainMenuApplied() => _mainMenuPatchesApplied = true;
 
+        public static void MarkMissionApplied() => _missionPatchesApplied = true;
+
+        public static void ResetStageFlags()
+        {
+            _mainMenuPatchesApplied = false;
+            _missionPatchesApplied = false;
+        }
+
         public static void ApplyThroughStage(string gameRoot, IReadOnlyList<ModManifest> manifests, LoadStage throughStage)
         {
             if (throughStage == LoadStage.Mission)

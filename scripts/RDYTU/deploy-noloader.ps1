@@ -231,4 +231,6 @@ if ($gameProc) {
     }
 }
 
+Deploy-NOLoaderRestoreHelper -GameRoot $GameRoot -RepoRoot $RepoRoot -Configuration $Configuration
+
 Write-Host "Uninstall / vanilla restore: .\scripts\uninstall-noloader.ps1"

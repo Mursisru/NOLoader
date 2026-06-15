@@ -6,6 +6,8 @@
 
 #include <fstream>
 
+#include <cstring>
+
 #include <mutex>
 
 #include <string>
@@ -142,15 +144,215 @@ namespace
 
             return;
 
-        std::wstring logPath = g_gameRoot + L"\\NOLoader\\logs\\proxy.log";
 
-        CreateDirectoryW((g_gameRoot + L"\\NOLoader\\logs").c_str(), nullptr);
+
+        std::wstring logPath;
+
+        if (GetFileAttributesW((g_gameRoot + L"\\NOLoader").c_str()) != INVALID_FILE_ATTRIBUTES)
+
+        {
+
+            const std::wstring loaderDir = g_gameRoot + L"\\NOLoader\\logs";
+
+            CreateDirectoryW(loaderDir.c_str(), nullptr);
+
+            logPath = loaderDir + L"\\proxy.log";
+
+        }
+
+        else
+
+        {
+
+            logPath = g_gameRoot + L"\\NOLoader_proxy.log";
+
+        }
+
+
 
         std::ofstream out(WideToUtf8(logPath), std::ios::app);
 
         if (out.is_open())
 
             out << message << '\n';
+
+    }
+
+
+
+    bool PathExists(const std::wstring& path)
+
+    {
+
+        const DWORD attr = GetFileAttributesW(path.c_str());
+
+        return attr != INVALID_FILE_ATTRIBUTES && !(attr & FILE_ATTRIBUTE_DIRECTORY);
+
+    }
+
+
+
+    bool FileContainsAscii(const std::wstring& path, const char* needle)
+
+    {
+
+        if (!needle || !needle[0])
+
+            return false;
+
+
+
+        std::ifstream in(path, std::ios::binary);
+
+        if (!in.is_open())
+
+            return false;
+
+
+
+        const size_t needleLen = std::strlen(needle);
+
+        std::vector<char> chunk(1 << 16);
+
+        std::string tail;
+
+        while (in)
+
+        {
+
+            in.read(chunk.data(), static_cast<std::streamsize>(chunk.size()));
+
+            const std::streamsize got = in.gcount();
+
+            if (got <= 0)
+
+                break;
+
+
+
+            tail.append(chunk.data(), static_cast<size_t>(got));
+
+            if (tail.size() > needleLen * 2)
+
+                tail.erase(0, tail.size() - needleLen * 2);
+
+
+
+            if (tail.find(needle) != std::string::npos)
+
+                return true;
+
+        }
+
+
+
+        return false;
+
+    }
+
+
+
+    bool ManagedHasNoloaderPatches(const std::wstring& livePath)
+
+    {
+
+        return FileContainsAscii(livePath, "NOLoader.Core")
+
+            || FileContainsAscii(livePath, "NOLoader.Registry")
+
+            || FileContainsAscii(livePath, "OnMainMenuReady")
+
+            || FileContainsAscii(livePath, "MissionGateHooks");
+
+    }
+
+
+
+    bool IsValidVanillaSnapshot(const std::wstring& bakPath)
+
+    {
+
+        return PathExists(bakPath) && !ManagedHasNoloaderPatches(bakPath);
+
+    }
+
+
+
+    bool IsNOLoaderInstalled()
+
+    {
+
+        return PathExists(g_gameRoot + L"\\NOLoader\\core\\NOLoader.Core.dll");
+
+    }
+
+
+
+    int RestoreVanillaSnapshots()
+
+    {
+
+        static const wchar_t* kModules[] = {
+
+            L"Assembly-CSharp.dll",
+
+            L"UnityEngine.CoreModule.dll",
+
+            L"UnityEngine.PhysicsModule.dll",
+
+            L"UnityEngine.UI.dll",
+
+        };
+
+
+
+        const std::wstring managed = g_gameRoot + L"\\NuclearOption_Data\\Managed";
+
+        int restored = 0;
+
+
+
+        for (const wchar_t* module : kModules)
+
+        {
+
+            const std::wstring live = managed + L"\\" + module;
+
+            const std::wstring bak = live + L".noloader.vanilla.bak";
+
+            if (!IsValidVanillaSnapshot(bak))
+
+                continue;
+
+            if (!ManagedHasNoloaderPatches(live))
+
+                continue;
+
+
+
+            if (CopyFileW(bak.c_str(), live.c_str(), FALSE))
+
+            {
+
+                ++restored;
+
+                LogLine(("Restored vanilla managed module: " + WideToUtf8(module)).c_str());
+
+            }
+
+            else
+
+            {
+
+                LogLine(("Failed to restore vanilla managed module: " + WideToUtf8(module)).c_str());
+
+            }
+
+        }
+
+
+
+        return restored;
 
     }
 
@@ -639,6 +841,28 @@ namespace noloader
             LogLine("NOLoader proxy attach");
 
             LoadConfig();
+
+
+
+            if (!IsNOLoaderInstalled())
+
+            {
+
+                const int restored = RestoreVanillaSnapshots();
+
+                if (restored > 0)
+
+                    LogLine("NOLoader not installed — vanilla managed DLLs restored; mono hook skipped");
+
+                else
+
+                    LogLine("NOLoader not installed — mono hook skipped (run NOLoaderRestore.exe if game still hangs)");
+
+                return;
+
+            }
+
+
 
             InstallGetProcAddressHook();
 

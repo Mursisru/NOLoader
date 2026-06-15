@@ -62,7 +62,9 @@ namespace NOLoader.Core
 
             RingBufferLog.WriteAscii("[NOLoader] Bootstrap.Initialize");
             RingBufferLog.WriteAscii($"[NOLoader] {AppVersion.Display}");
+#if !NOLoader_DEV
             RingBufferLog.WriteAscii("[NOLoader] perf profile=" + BuildPerfProfileLabel());
+#endif
 
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
@@ -192,9 +194,13 @@ namespace NOLoader.Core
             ModIlAssemblyLoadHook.Register(manifests, LoaderRoot);
             ModIlAssemblyLoadHook.PreloadPatchAssemblies(manifests, LoaderRoot);
 
-            if (csharpCorePrePatched)
+            if (ModPatchReconciler.TryReconcile(GameRoot, LoaderRoot, manifests))
             {
-                RingBufferLog.WriteAscii("[NOLoader] Assembly-CSharp core pre-patched — runtime Cecil skipped for core");
+                RingBufferLog.WriteAscii("[NOLoader] Assembly-CSharp synced to current mods folder");
+            }
+            else if (csharpCorePrePatched)
+            {
+                RingBufferLog.WriteAscii("[NOLoader] Assembly-CSharp core pre-patched — mod IL in sync");
             }
             else
             {
