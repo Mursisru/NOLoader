@@ -101,10 +101,6 @@ Typical Steam install:
 
 1. Download **NOLoader-0.1.0-RDYTU.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0).
 2. **Close the game.**
-<<<<<<< HEAD
-3. Extract into the game root.
-4. Launch (if you need to check log - `NOLoader/logs/proxy.log`).
-=======
 3. Extract into the game root (folder containing `Nuclear Option.exe`).
 4. Apply Cecil patches if not already present (see [docs/INSTALL.md](docs/INSTALL.md)).
 5. Launch — check `NOLoader/logs/proxy.log`.
@@ -119,7 +115,6 @@ From the repository root (game **closed**):
 # or
 .\scripts\deploy-noloader.ps1 -Configuration DEV_SDK
 ```
->>>>>>> 37d3b8a (Docs: remove private paths; restore scripts in repo)
 
 Optional `-GameRoot` if the game is not in the default Steam location.
 
@@ -153,11 +148,8 @@ RDYTU section controls performance (ring log, physics hooks). DEV.SDK ignores `[
 ## Using mods
 
 See [docs/MOD_AUTHOR.md](docs/MOD_AUTHOR.md). Drop folders under `NOLoader/mods/`.
-<<<<<<< HEAD
-=======
 
 For RDYTU hash-only packs: `.\scripts\pack-mod-rdytu.ps1`
->>>>>>> 37d3b8a (Docs: remove private paths; restore scripts in repo)
 
 ---
 
@@ -171,15 +163,12 @@ dotnet test tests\NOLoader.Core.Tests\NOLoader.Core.Tests.csproj -c DEV_SDK
 
 ---
 
-<<<<<<< HEAD
-=======
 ## Scripts
 
 PowerShell helpers in [`scripts/`](scripts/) — deploy, build proxy, verify, hash baking, release zips. See [scripts/README.md](scripts/README.md).
 
 ---
 
->>>>>>> 37d3b8a (Docs: remove private paths; restore scripts in repo)
 ## Documentation index
 
 | Document | Contents |
@@ -202,10 +191,7 @@ PowerShell helpers in [`scripts/`](scripts/) — deploy, build proxy, verify, ha
 | No loader | Remove BepInEx winhttp; deploy proxy |
 | Patch fail | Close game; restore `.noloader.bak`; redeploy |
 | Gate L4 block | Fix mod error; check logs |
-<<<<<<< HEAD
-=======
 | Compare FPS vs vanilla | Restore managed DLLs from `.noloader.bak`, remove loader files |
->>>>>>> 37d3b8a (Docs: remove private paths; restore scripts in repo)
 
 ---
 
