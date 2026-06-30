@@ -2,7 +2,10 @@
 
 # NOLoader
 
-[![Nuclear Option](https://img.shields.io/badge/Game-Nuclear%20Option-blue)](https://store.steampowered.com/app/2168680/Nuclear_Option/) [![NOLoader](https://img.shields.io/badge/Project-NOLoader%20Engine-purple)](https://github.com/Mursisru/NOLoader) [![Version](https://img.shields.io/badge/Version-0.1.0-green)]() [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
+[![Nuclear Option](https://img.shields.io/badge/Game-Nuclear%20Option-blue)](https://store.steampowered.com/app/2168680/Nuclear_Option/)
+[![NOLoader](https://img.shields.io/badge/Project-NOLoader%20Engine-purple)](https://github.com/Mursisru/NOLoader)
+[![Version](https://img.shields.io/badge/Version-0.1.0-green)](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](https://github.com/Mursisru/NOLoader/blob/main/LICENSE)
 
 
 Standalone mod loader for **Nuclear Option** (Unity Mono). Replaces BepInEx for new mods: lightweight native bootstrap, declarative `mod.json`, Mono.Cecil IL patches, and layered validation gates — without Harmony at runtime.
@@ -102,6 +105,12 @@ Typical Steam install:
 
 ## Installation
 
+> [!IMPORTANT]
+> **Close Nuclear Option** before installing or updating NOLoader. PatchTool edits `NuclearOption_Data\Managed\*.dll` — a running game causes Win32 IO errors.
+
+> [!WARNING]
+> **Remove conflicting loaders** — uninstall BepInEx `winhttp.dll` / Doorstop bootstrap from the game root before deploying NOLoader. Only one `winhttp.dll` proxy may be active.
+
 ### Download GitHub Release (players)
 
 1. Download **NOLoader-0.1.0-RDYTU.zip** from [Release v0.1.0](https://github.com/Mursisru/NOLoader/releases/tag/v0.1.0).
@@ -117,12 +126,7 @@ From the repository root (game **closed**):
 ```powershell
 .\scripts\build-proxy.ps1
 .\scripts\deploy-noloader.ps1 -Configuration RDYTU
-**Developer:** Mursisru
-
 # or
-
-[![Nuclear Option](https://img.shields.io/badge/Game-Nuclear%20Option-blue)](https://store.steampowered.com/app/2168680/Nuclear_Option/) [![NOLoader](https://img.shields.io/badge/Project-NOLoader%20Engine-purple)](https://github.com/Mursisru/NOLoader) [![Version](https://img.shields.io/badge/Version-0.1.0-green)]() [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
-
 .\scripts\deploy-noloader.ps1 -Configuration DEV_SDK
 ```
 
