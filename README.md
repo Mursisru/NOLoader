@@ -19,8 +19,23 @@ Standalone mod loader for **Nuclear Option** (Unity Mono). Replaces BepInEx for 
 
 ---
 
+## Critical warnings
+
+> [!IMPORTANT]
+> **Close Nuclear Option** before installing or updating NOLoader. PatchTool edits `NuclearOption_Data\Managed\*.dll` - a running game causes Win32 IO errors.
+
+> [!WARNING]
+> **Remove conflicting loaders** - uninstall BepInEx `winhttp.dll` / Doorstop bootstrap before deploying NOLoader. Only one `winhttp.dll` proxy may be active.
+
+> [!CAUTION]
+> **Do not mix DEV.SDK and RDYTU runtime in one game session** - pick player (RDYTU) or mod-author (DEV.SDK) channel consistently.
+
+> [!NOTE]
+> **Two release zips:** `NOLoader-0.1.0-RDYTU.zip` (players) and `NOLoader-0.1.0-DEV.SDK.zip` (mod authors with F10/F11 overlay).
+
 ## Table of contents
 
+- [Critical warnings](#critical-warnings)
 1. [Features](#features)
 2. [Architecture overview](#architecture-overview)
 3. [RDYTU vs DEV.SDK](#rdytu-vs-devsdk)
@@ -34,8 +49,6 @@ Standalone mod loader for **Nuclear Option** (Unity Mono). Replaces BepInEx for 
 11. [Documentation index](#documentation-index)
 12. [Troubleshooting](#troubleshooting)
 13. [Migration from BepInEx](#migration-from-bepinex)
-
----
 
 ## Features
 
