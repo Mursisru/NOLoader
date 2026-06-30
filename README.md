@@ -1,4 +1,9 @@
+**Developer:** Mursisru
+
 # NOLoader
+
+[![Nuclear Option](https://img.shields.io/badge/Game-Nuclear%20Option-blue)](https://store.steampowered.com/app/2168680/Nuclear_Option/) [![NOLoader](https://img.shields.io/badge/Project-NOLoader%20Engine-purple)](https://github.com/Mursisru/NOLoader) [![Version](https://img.shields.io/badge/Version-0.1.0-green)]() [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
+
 
 Standalone mod loader for **Nuclear Option** (Unity Mono). Replaces BepInEx for new mods: lightweight native bootstrap, declarative `mod.json`, Mono.Cecil IL patches, and layered validation gates — without Harmony at runtime.
 
@@ -112,7 +117,12 @@ From the repository root (game **closed**):
 ```powershell
 .\scripts\build-proxy.ps1
 .\scripts\deploy-noloader.ps1 -Configuration RDYTU
+**Developer:** Mursisru
+
 # or
+
+[![Nuclear Option](https://img.shields.io/badge/Game-Nuclear%20Option-blue)](https://store.steampowered.com/app/2168680/Nuclear_Option/) [![NOLoader](https://img.shields.io/badge/Project-NOLoader%20Engine-purple)](https://github.com/Mursisru/NOLoader) [![Version](https://img.shields.io/badge/Version-0.1.0-green)]() [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
+
 .\scripts\deploy-noloader.ps1 -Configuration DEV_SDK
 ```
 
@@ -210,3 +220,9 @@ DEV.SDK/   RDYTU/   deploy/   docs/   scripts/   tests/
 ```
 
 Version: [src/NOLoader.Core/AppVersion.cs](src/NOLoader.Core/AppVersion.cs)
+
+---
+
+## Keywords
+
+nuclear-option, noloader, mod-loader, csharp, unity, cecil

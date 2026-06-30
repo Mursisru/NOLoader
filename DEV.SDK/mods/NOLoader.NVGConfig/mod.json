@@ -1,0 +1,30 @@
+{
+  "id": "com.at747.nvgconfig",
+  "guid": "a1b2c3d4e5f64789a0b1c2d3e4f56789",
+  "version": "1.1.0",
+  "name": "NVG Config",
+  "assembly": "NOLoader.NVGConfig.dll",
+  "entryType": "NOLoader.NVGConfig.NVGConfigMod",
+  "loadStage": "Mission",
+  "dependencies": [],
+  "patches": [
+    {
+      "target": "NightVision::Start",
+      "inject": "NOLoader.NVGConfig.Patches::StartPostfix",
+      "method": "Postfix",
+      "expectedSignatureHash": "D91ECFB556863BE2"
+    },
+    {
+      "target": "NightVision::Update",
+      "inject": "NOLoader.NVGConfig.Patches::UpdatePostfix",
+      "method": "Postfix",
+      "expectedSignatureHash": "9568D0F192F18550"
+    },
+    {
+      "target": "NightVision::NightVis_OnSwitchCam",
+      "inject": "NOLoader.NVGConfig.Patches::OnSwitchCamPostfix",
+      "method": "Postfix",
+      "expectedSignatureHash": "5FC06EA8A908590E"
+    }
+  ]
+}

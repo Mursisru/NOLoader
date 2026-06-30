@@ -82,6 +82,9 @@ namespace NOLoader.Core.Runtime
         /// <summary>Skip GPU tweaker + adaptive trees while cockpit TrackIR is active (vanilla camera path).</summary>
         public static bool TrackIrSafeModeEnabled { get; private set; } = true;
 
+        /// <summary>RDYTU.mini — write noloader_boot.log on startup.</summary>
+        public static bool RdytuMiniEnabled { get; private set; }
+
 #if NOLoader_DEV
         /// <summary>UDP Sim-Connect telemetry (DEV.SDK only).</summary>
         public static int TelemetryCaptureStride { get; private set; } = 1;
@@ -311,6 +314,9 @@ namespace NOLoader.Core.Runtime
                             System.Globalization.CultureInfo.InvariantCulture, out double warmupBudget)
                         && warmupBudget > 0)
                         ModShaderWarmupBudgetMs = warmupBudget;
+                    break;
+                case "rdytu_mini":
+                    RdytuMiniEnabled = ParseBool(value, RdytuMiniEnabled);
                     break;
             }
         }

@@ -2,7 +2,8 @@ param(
     [string]$GameRoot = "C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option",
     [switch]$IncludePlayerMods,
     [switch]$FieldTest,
-    [switch]$Minimal
+    [switch]$Minimal,
+    [switch]$RdytuMini
 )
 
 $ErrorActionPreference = "Stop"
@@ -105,7 +106,11 @@ if (Test-Path $iniPath) {
 Copy-Item -Force (Join-Path $RepoRoot "deploy\noloader_config.ini") $iniPath
 Restore-IniOverrides -Path $iniPath -Overrides $preserve
 
-if ($Minimal) {
+if ($RdytuMini) {
+    Copy-Item -Force (Join-Path $RepoRoot "deploy\noloader_config.mini.ini") $iniPath
+    Restore-IniOverrides -Path $iniPath -Overrides $preserve
+    Write-Host "RDYTU.mini INI deployed (mod optimizer only)"
+} elseif ($Minimal) {
     foreach ($pair in @{
         'engine_tweaker' = '0'; 'string_cache' = '0'; 'culling_optimizer' = '0'
         'culling_ground_wheels' = '0'; 'culling_pilot_anim' = '0'; 'culling_offscreen_only' = '0'; 'culling_on_screen_max_m' = '0'

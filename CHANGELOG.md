@@ -1,4 +1,10 @@
-﻿# Changelog
+# Changelog
+
+## [0.1.0] - 2026-06-30
+
+### Changed
+- Documentation refresh: Developer header, badges, GitHub Alerts, Keywords, gitignore hygiene.
+
 
 All notable changes to NOLoader. Version strings in code: `AppVersion.cs` (`DEV1PM*` / `RDY1R*`).
 
